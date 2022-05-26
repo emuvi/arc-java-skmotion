@@ -5,7 +5,6 @@ import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,14 +15,18 @@ import javax.imageio.ImageIO;
 public class RecMotion {
 
   private final Rectangle area;
+  private final File destiny;
   private final Long startTime = System.currentTimeMillis();
   private final AtomicBoolean isCapturing = new AtomicBoolean(true);
   private final Deque<BufferedImage> captured = new ConcurrentLinkedDeque<>();
   private final long captureInterval = 15;
   private volatile long lastCaptured = 0;
 
-  public RecMotion(Rectangle area) {
+  private ThreadGroup processing = null;
+
+  public RecMotion(Rectangle area, File destiny) {
     this.area = area;
+    this.destiny = destiny;
   }
 
   private synchronized boolean isTimeToCapture() {
@@ -34,8 +37,8 @@ public class RecMotion {
     return result;
   }
 
-  private Thread spawnCapturer(int index) {
-    var result = new Thread("Capturer " + index) {
+  private void spawnCapturer(int index) {
+    new Thread(processing, "Capturer " + index) {
       public void run() {
         try {
           var robot = new Robot();
@@ -49,21 +52,19 @@ public class RecMotion {
           e.printStackTrace();
         }
       }
-    };
-    result.start();
-    return result;
+    }.start();
   }
 
   private final AtomicInteger savedIndex = new AtomicInteger(0);
 
-  private Thread spawnSaver(int index) {
-    var result = new Thread("Saver " + index) {
+  private void spawnSaver(int index) {
+    new Thread("Saver " + index) {
       public void run() {
         try {
           while (true) {
             var screen = captured.pollFirst();
             if (screen != null) {
-              var file = new File("captured-" + savedIndex.incrementAndGet() + ".png");
+              var file = new File(destiny, "captured-" + savedIndex.incrementAndGet() + ".png");
               ImageIO.write(screen, "jpg", file);
             } else if (!isCapturing.get()) {
               break;
@@ -73,32 +74,39 @@ public class RecMotion {
           e.printStackTrace();
         }
       }
-    };
-    result.start();
-    return result;
+    }.start();
   }
 
   public void start() throws Exception {
-    var threadGroup = new ArrayList<Thread>();
+    if (processing != null) {
+      throw new Exception("Already started");
+    }
+    processing = new ThreadGroup("RecMotion");
+    isCapturing.set(true);
     for (int i = 0; i < 4; i++) {
-      threadGroup.add(spawnCapturer(i));
+      spawnCapturer(i);
       Thread.sleep(captureInterval);
     }
     for (int i = 0; i < 2; i++) {
-      threadGroup.add(spawnSaver(i));
       Thread.sleep(captureInterval);
+      spawnSaver(i);
     }
-    var captureFor = 1000 * 10;
+  }
+
+  public void stop() {
+    isCapturing.set(false);
+  }
+
+  public void join() {
     while (true) {
-      Thread.sleep(captureInterval);
-      if (System.currentTimeMillis() - startTime > captureFor) {
-        isCapturing.set(false);
+      if (processing.activeCount() == 0) {
         break;
       }
-    }
-    isCapturing.set(false);
-    for (var thread : threadGroup) {
-      thread.join();
+      try {
+        Thread.sleep(100);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
     }
   }
 
