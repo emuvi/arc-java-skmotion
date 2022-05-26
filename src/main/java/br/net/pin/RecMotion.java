@@ -5,7 +5,9 @@ import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -16,13 +18,14 @@ public class RecMotion {
 
   private final Rectangle area;
   private final File destiny;
-  private final Long startTime = System.currentTimeMillis();
   private final AtomicBoolean isCapturing = new AtomicBoolean(true);
   private final Deque<BufferedImage> captured = new ConcurrentLinkedDeque<>();
   private final long captureInterval = 15;
   private volatile long lastCaptured = 0;
+  private volatile long startTime = System.currentTimeMillis();
 
-  private ThreadGroup processing = null;
+  private final ThreadGroup grouped = new ThreadGroup("RecMotion");
+  private final List<Thread> working = new ArrayList<>();
 
   public RecMotion(Rectangle area, File destiny) {
     this.area = area;
@@ -38,7 +41,7 @@ public class RecMotion {
   }
 
   private void spawnCapturer(int index) {
-    new Thread(processing, "Capturer " + index) {
+    var thread = new Thread(grouped, "Capturer " + index) {
       public void run() {
         try {
           var robot = new Robot();
@@ -52,13 +55,15 @@ public class RecMotion {
           e.printStackTrace();
         }
       }
-    }.start();
+    };
+    working.add(thread);
+    thread.start();
   }
 
   private final AtomicInteger savedIndex = new AtomicInteger(0);
 
   private void spawnSaver(int index) {
-    new Thread("Saver " + index) {
+    var thread = new Thread("Saver " + index) {
       public void run() {
         try {
           while (true) {
@@ -74,14 +79,16 @@ public class RecMotion {
           e.printStackTrace();
         }
       }
-    }.start();
+    };
+    working.add(thread);
+    thread.start();
   }
 
   public void start() throws Exception {
-    if (processing != null) {
+    startTime = System.currentTimeMillis();
+    if (!working.isEmpty()) {
       throw new Exception("Already started");
     }
-    processing = new ThreadGroup("RecMotion");
     isCapturing.set(true);
     for (int i = 0; i < 4; i++) {
       spawnCapturer(i);
@@ -97,17 +104,12 @@ public class RecMotion {
     isCapturing.set(false);
   }
 
-  public void join() {
-    while (true) {
-      if (processing.activeCount() == 0) {
-        break;
-      }
-      try {
-        Thread.sleep(100);
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
+  public long join() throws Exception {
+    for (var thread : working) {
+      thread.join();
     }
+    working.clear();
+    return System.currentTimeMillis() - startTime;
   }
 
   private boolean hasChanged(BufferedImage img1, BufferedImage img2) {
