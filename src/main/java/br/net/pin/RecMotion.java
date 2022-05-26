@@ -14,6 +14,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.imageio.ImageIO;
 
+import org.bytedeco.ffmpeg.global.avcodec;
+import org.bytedeco.ffmpeg.global.avutil;
+import org.bytedeco.javacv.FFmpegFrameRecorder;
+import org.bytedeco.javacv.Java2DFrameConverter;
+
 public class RecMotion {
 
   private final Rectangle area;
@@ -64,7 +69,7 @@ public class RecMotion {
 
   @SuppressWarnings("unused")
   private void spawnSaverPictures(int index) {
-    var thread = new Thread("JPG Saver " + index) {
+    var thread = new Thread("Pictures Saver " + index) {
       public void run() {
         try {
           while (true) {
@@ -86,10 +91,30 @@ public class RecMotion {
   }
 
   private void spawnSaverMovie() {
-    var thread = new Thread("MOV Saver") {
+    var thread = new Thread("Movie Saver") {
       public void run() {
         try {
+          var recorder = new FFmpegFrameRecorder(destiny, 800, 600);
+          recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+          recorder.setFrameRate(25);
+          recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
+          recorder.setFormat("mp4");
+          recorder.start();
+          var converter = new Java2DFrameConverter();
 
+          while (true) {
+            var screen = captured.pollFirst();
+            if (screen != null) {
+              recorder.record(converter.getFrame(screen));
+            } else if (!isCapturing.get()) {
+              break;
+            }
+          }
+
+          converter.close();
+          recorder.stop();
+          recorder.release();
+          recorder.close();
         } catch (Exception e) {
           e.printStackTrace();
         }
