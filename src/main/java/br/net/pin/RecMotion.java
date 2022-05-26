@@ -1,23 +1,20 @@
 package br.net.pin;
 
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.imageio.ImageIO;
-
-import org.bytedeco.ffmpeg.global.avcodec;
-import org.bytedeco.ffmpeg.global.avutil;
-import org.bytedeco.javacv.FFmpegFrameRecorder;
-import org.bytedeco.javacv.Java2DFrameConverter;
+import org.jcodec.api.awt.AWTSequenceEncoder;
+import org.jcodec.common.io.NIOUtils;
+import org.jcodec.common.io.SeekableByteChannel;
+import org.jcodec.common.model.Rational;
 
 public class RecMotion {
 
@@ -25,7 +22,7 @@ public class RecMotion {
   private final File destiny;
   private final AtomicBoolean isCapturing = new AtomicBoolean(true);
   private final Deque<BufferedImage> captured = new ConcurrentLinkedDeque<>();
-  private final long captureInterval = 15;
+  private final long captureInterval = 100;
   private volatile long lastCaptured = 0;
   private volatile long startTime = System.currentTimeMillis();
 
@@ -38,9 +35,11 @@ public class RecMotion {
   }
 
   private synchronized boolean isTimeToCapture() {
-    var result = System.currentTimeMillis() - lastCaptured > captureInterval;
+    var now = System.currentTimeMillis();
+    var elapsed = now - lastCaptured;
+    var result = elapsed >= captureInterval;
     if (result) {
-      lastCaptured = System.currentTimeMillis();
+      lastCaptured = now;
     }
     return result;
   }
@@ -52,7 +51,10 @@ public class RecMotion {
           var robot = new Robot();
           while (isCapturing.get()) {
             if (isTimeToCapture()) {
-              var screen = robot.createScreenCapture(area);
+              var all = robot.createScreenCapture(area);
+              var tmp = all.getScaledInstance(800, 600, Image.SCALE_SMOOTH);
+              var screen = new BufferedImage(800, 600, BufferedImage.TYPE_INT_RGB);
+              screen.createGraphics().drawImage(tmp, 0, 0, null);
               captured.addLast(screen);
             }
           }
@@ -65,58 +67,27 @@ public class RecMotion {
     thread.start();
   }
 
-  private final AtomicInteger savedIndex = new AtomicInteger(0);
-
-  @SuppressWarnings("unused")
-  private void spawnSaverPictures(int index) {
-    var thread = new Thread("Pictures Saver " + index) {
-      public void run() {
-        try {
-          while (true) {
-            var screen = captured.pollFirst();
-            if (screen != null) {
-              var file = new File(destiny, "captured-" + savedIndex.incrementAndGet() + ".png");
-              ImageIO.write(screen, "jpg", file);
-            } else if (!isCapturing.get()) {
-              break;
-            }
-          }
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-    };
-    working.add(thread);
-    thread.start();
-  }
-
   private void spawnSaverMovie() {
-    var thread = new Thread("Movie Saver") {
+    var thread = new Thread(grouped, "Movie Saver") {
       public void run() {
+        SeekableByteChannel out = null;
         try {
-          var recorder = new FFmpegFrameRecorder(destiny, 800, 600);
-          recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-          recorder.setFrameRate(25);
-          recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
-          recorder.setFormat("mp4");
-          recorder.start();
-          var converter = new Java2DFrameConverter();
-
+          out = NIOUtils.writableFileChannel(destiny.getAbsolutePath());
+          var encoder = new AWTSequenceEncoder(out, Rational.R(10, 1));
           while (true) {
             var screen = captured.pollFirst();
             if (screen != null) {
-              recorder.record(converter.getFrame(screen));
+              encoder.encodeImage(screen);
             } else if (!isCapturing.get()) {
               break;
             }
           }
-
-          converter.close();
-          recorder.stop();
-          recorder.release();
-          recorder.close();
+          encoder.finish();
         } catch (Exception e) {
           e.printStackTrace();
+        } finally {
+          NIOUtils.closeQuietly(out);
+          System.out.println("Closed");
         }
       }
     };
@@ -130,7 +101,7 @@ public class RecMotion {
       throw new Exception("Already started");
     }
     isCapturing.set(true);
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 2; i++) {
       spawnCapturer(i);
       Thread.sleep(captureInterval);
     }
@@ -149,7 +120,6 @@ public class RecMotion {
     return System.currentTimeMillis() - startTime;
   }
 
-  @SuppressWarnings("unused")
   private boolean hasChanged(BufferedImage img1, BufferedImage img2) {
     if (img1.getWidth() == img2.getWidth() && img1.getHeight() == img2.getHeight()) {
       for (int x = 0; x < img1.getWidth(); x++) {
