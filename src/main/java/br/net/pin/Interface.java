@@ -171,11 +171,12 @@ public class Interface {
         @Override
         public void run() {
           try {
-            recMotion.join();
+            var elapsed = recMotion.join();
             recMotion = null;
             SwingUtilities.invokeLater(() -> {
               buttonAction.setText("Start");
               buttonAction.setEnabled(true);
+              JOptionPane.showMessageDialog(frame, "Recording finished in " + formatTime(elapsed));
             });
           } catch (Exception ex) {
             ex.printStackTrace();
@@ -183,6 +184,21 @@ public class Interface {
         }
       }.start();
     }
+  }
+
+  private static String formatTime(long elapsed) {
+    var sb = new StringBuilder();
+    var seconds = elapsed / 1000;
+    var minutes = seconds / 60;
+    var hours = minutes / 60;
+    if (hours > 0) {
+      sb.append(hours).append("h ");
+    }
+    if (minutes > 0) {
+      sb.append(minutes).append("m ");
+    }
+    sb.append(seconds).append("s");
+    return sb.toString();
   }
 
 }
