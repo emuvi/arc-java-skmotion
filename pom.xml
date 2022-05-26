@@ -15,14 +15,14 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.bytedeco</groupId>
-      <artifactId>javacv-platform</artifactId>
-      <version>1.5.7</version>
+      <groupId>org.jcodec</groupId>
+      <artifactId>jcodec</artifactId>
+      <version>0.2.5</version>
     </dependency>
     <dependency>
-      <groupId>org.pushing-pixels</groupId>
-      <artifactId>radiance-theming</artifactId>
-      <version>5.0.0</version>
+      <groupId>org.jcodec</groupId>
+      <artifactId>jcodec-javase</artifactId>
+      <version>0.2.5</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
