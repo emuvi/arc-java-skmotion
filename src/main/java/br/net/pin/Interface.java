@@ -4,6 +4,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -15,6 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
@@ -43,9 +45,9 @@ public class Interface {
     labelDestiny.setHorizontalAlignment(SwingConstants.RIGHT);
     buttonStart.addActionListener((ev) -> {
       try {
-        save();
-      } catch (Exception e1) {
-        e1.printStackTrace();
+        start();
+      } catch (Exception ex) {
+        JOptionPane.showMessageDialog(frame, ex.getMessage());
       }
     });
   }
@@ -139,6 +141,23 @@ public class Interface {
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setSize(360, frame.getMinimumSize().height);
     frame.setVisible(true);
+  }
+
+  private void start() throws Exception {
+    save();
+    var monitor = String.valueOf(comboMonitor.getSelectedItem());
+    var graphics = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    Rectangle area = null;
+    for (var device : graphics.getScreenDevices()) {
+      if (monitor == device.getIDstring()) {
+        area = device.getDefaultConfiguration().getBounds();
+        break;
+      }
+    }
+    if (area == null) {
+      throw new Exception("Monitor not found");
+    }
+    new RecMotion(area).start();
   }
 
 }
