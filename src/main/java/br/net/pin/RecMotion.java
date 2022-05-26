@@ -1,5 +1,6 @@
 package br.net.pin;
 
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Robot;
@@ -19,6 +20,7 @@ import org.jcodec.common.model.Rational;
 public class RecMotion {
 
   private final Rectangle area;
+  private final Dimension size;
   private final File destiny;
   private final AtomicBoolean isCapturing = new AtomicBoolean(true);
   private final Deque<BufferedImage> captured = new ConcurrentLinkedDeque<>();
@@ -29,8 +31,9 @@ public class RecMotion {
   private final ThreadGroup grouped = new ThreadGroup("RecMotion");
   private final List<Thread> working = new ArrayList<>();
 
-  public RecMotion(Rectangle area, File destiny) {
+  public RecMotion(Rectangle area, Dimension size, File destiny) {
     this.area = area;
+    this.size = size;
     this.destiny = destiny;
   }
 
@@ -52,8 +55,8 @@ public class RecMotion {
           while (isCapturing.get()) {
             if (isTimeToCapture()) {
               var all = robot.createScreenCapture(area);
-              var tmp = all.getScaledInstance(800, 600, Image.SCALE_SMOOTH);
-              var screen = new BufferedImage(800, 600, BufferedImage.TYPE_INT_RGB);
+              var tmp = all.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH);
+              var screen = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
               screen.createGraphics().drawImage(tmp, 0, 0, null);
               captured.addLast(screen);
             }

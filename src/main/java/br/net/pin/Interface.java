@@ -1,5 +1,6 @@
 package br.net.pin;
 
+import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -160,7 +161,15 @@ public class Interface {
       if (area == null) {
         throw new Exception("Monitor not found");
       }
-      recMotion = new RecMotion(area, new File(textDestiny.getText()));
+      var resolution = String.valueOf(comboResolution.getSelectedItem());
+      var parts = resolution.split("x");
+      if (parts.length != 2) {
+        throw new Exception("Resolution mal formed");
+      }
+      var width = Integer.parseInt(parts[0]);
+      var height = Integer.parseInt(parts[1]);
+      var size = new Dimension(width, height);
+      recMotion = new RecMotion(area, size, new File(textDestiny.getText()));
       recMotion.start();
       buttonAction.setText("Stop");
       save();
