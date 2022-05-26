@@ -62,8 +62,9 @@ public class RecMotion {
 
   private final AtomicInteger savedIndex = new AtomicInteger(0);
 
-  private void spawnSaver(int index) {
-    var thread = new Thread("Saver " + index) {
+  @SuppressWarnings("unused")
+  private void spawnSaverToJPG(int index) {
+    var thread = new Thread("JPG Saver " + index) {
       public void run() {
         try {
           while (true) {
@@ -84,6 +85,20 @@ public class RecMotion {
     thread.start();
   }
 
+  private void spawnSaverToMOV() {
+    var thread = new Thread("MOV Saver") {
+      public void run() {
+        try {
+
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    };
+    working.add(thread);
+    thread.start();
+  }
+
   public void start() throws Exception {
     startTime = System.currentTimeMillis();
     if (!working.isEmpty()) {
@@ -94,10 +109,7 @@ public class RecMotion {
       spawnCapturer(i);
       Thread.sleep(captureInterval);
     }
-    for (int i = 0; i < 2; i++) {
-      Thread.sleep(captureInterval);
-      spawnSaver(i);
-    }
+    spawnSaverToMOV();
   }
 
   public void stop() {
@@ -112,6 +124,7 @@ public class RecMotion {
     return System.currentTimeMillis() - startTime;
   }
 
+  @SuppressWarnings("unused")
   private boolean hasChanged(BufferedImage img1, BufferedImage img2) {
     if (img1.getWidth() == img2.getWidth() && img1.getHeight() == img2.getHeight()) {
       for (int x = 0; x < img1.getWidth(); x++) {
