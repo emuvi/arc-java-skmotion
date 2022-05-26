@@ -18,18 +18,18 @@ public class RecMotion {
   private final Rectangle area;
   private final Long startTime = System.currentTimeMillis();
   private final AtomicBoolean isCapturing = new AtomicBoolean(true);
-  private Deque<BufferedImage> captured = new ConcurrentLinkedDeque<>();
-  private final long captureInterval = 25;
-  private volatile long lastCapture = 0;
+  private final Deque<BufferedImage> captured = new ConcurrentLinkedDeque<>();
+  private final long captureInterval = 15;
+  private volatile long lastCaptured = 0;
 
   public RecMotion(Rectangle area) {
     this.area = area;
   }
 
   private synchronized boolean isTimeToCapture() {
-    var result = System.currentTimeMillis() - lastCapture > captureInterval;
+    var result = System.currentTimeMillis() - lastCaptured > captureInterval;
     if (result) {
-      lastCapture = System.currentTimeMillis();
+      lastCaptured = System.currentTimeMillis();
     }
     return result;
   }
