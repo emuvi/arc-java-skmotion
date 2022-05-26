@@ -19,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 public class Interface {
 
@@ -32,7 +33,9 @@ public class Interface {
   private final JComboBox<String> comboResolution = new JComboBox<String>(modelResolution);
   private final JLabel labelDestiny = new JLabel("Destiny:");
   private final JTextField textDestiny = new JTextField(60);
-  private final JButton buttonStart = new JButton("Start");
+  private final JButton buttonAction = new JButton("Start");
+
+  private volatile RecMotion recMotion = null;
 
   public Interface() {
     setupComponents();
@@ -43,9 +46,9 @@ public class Interface {
     labelMonitor.setHorizontalAlignment(SwingConstants.RIGHT);
     labelResolution.setHorizontalAlignment(SwingConstants.RIGHT);
     labelDestiny.setHorizontalAlignment(SwingConstants.RIGHT);
-    buttonStart.addActionListener((ev) -> {
+    buttonAction.addActionListener((ev) -> {
       try {
-        start();
+        doStartOrStop();
       } catch (Exception ex) {
         JOptionPane.showMessageDialog(frame, ex.getMessage());
       }
@@ -90,7 +93,7 @@ public class Interface {
     like.gridx = 1;
     like.gridy = 3;
     like.weightx = 3.0;
-    pane.add(buttonStart, like);
+    pane.add(buttonAction, like);
     frame.pack();
   }
 
@@ -143,21 +146,43 @@ public class Interface {
     frame.setVisible(true);
   }
 
-  private void start() throws Exception {
-    save();
-    var monitor = String.valueOf(comboMonitor.getSelectedItem());
-    var graphics = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    Rectangle area = null;
-    for (var device : graphics.getScreenDevices()) {
-      if (monitor == device.getIDstring()) {
-        area = device.getDefaultConfiguration().getBounds();
-        break;
+  private void doStartOrStop() throws Exception {
+    if (recMotion == null) {
+      var monitor = String.valueOf(comboMonitor.getSelectedItem());
+      var graphics = GraphicsEnvironment.getLocalGraphicsEnvironment();
+      Rectangle area = null;
+      for (var device : graphics.getScreenDevices()) {
+        if (monitor == device.getIDstring()) {
+          area = device.getDefaultConfiguration().getBounds();
+          break;
+        }
       }
+      if (area == null) {
+        throw new Exception("Monitor not found");
+      }
+      recMotion = new RecMotion(area, new File(textDestiny.getText()));
+      recMotion.start();
+      buttonAction.setText("Stop");
+      save();
+    } else {
+      recMotion.stop();
+      buttonAction.setEnabled(false);
+      new Thread("Waiting to stop") {
+        @Override
+        public void run() {
+          try {
+            recMotion.join();
+            recMotion = null;
+            SwingUtilities.invokeLater(() -> {
+              buttonAction.setText("Start");
+              buttonAction.setEnabled(true);
+            });
+          } catch (Exception ex) {
+            ex.printStackTrace();
+          }
+        }
+      }.start();
     }
-    if (area == null) {
-      throw new Exception("Monitor not found");
-    }
-    new RecMotion(area).start();
   }
 
 }
