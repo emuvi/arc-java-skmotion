@@ -63,7 +63,7 @@ public class RecMotion {
   private final AtomicInteger savedIndex = new AtomicInteger(0);
 
   @SuppressWarnings("unused")
-  private void spawnSaverToJPG(int index) {
+  private void spawnSaverPictures(int index) {
     var thread = new Thread("JPG Saver " + index) {
       public void run() {
         try {
@@ -85,7 +85,7 @@ public class RecMotion {
     thread.start();
   }
 
-  private void spawnSaverToMOV() {
+  private void spawnSaverMovie() {
     var thread = new Thread("MOV Saver") {
       public void run() {
         try {
@@ -109,7 +109,7 @@ public class RecMotion {
       spawnCapturer(i);
       Thread.sleep(captureInterval);
     }
-    spawnSaverToMOV();
+    spawnSaverMovie();
   }
 
   public void stop() {
