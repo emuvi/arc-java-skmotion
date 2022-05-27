@@ -44,7 +44,7 @@ public class Interface {
   private final SpinnerNumberModel modelSensitivity = new SpinnerNumberModel(0.01, 0.0, 1.0, 0.001);
   private final JSpinner spinnerSensitivity = new JSpinner(modelSensitivity);
   private final JLabel labelResilience = new JLabel("Resilience:");
-  private final SpinnerNumberModel modelResilience = new SpinnerNumberModel(10, 0, 10000, 1);
+  private final SpinnerNumberModel modelResilience = new SpinnerNumberModel(10, 0, 1_000_000, 1);
   private final JSpinner spinnerResilience = new JSpinner(modelResilience);
   private final JLabel labelDestiny = new JLabel("Destiny:");
   private final JTextField textDestiny = new JTextField();
@@ -177,7 +177,7 @@ public class Interface {
 
   private void loadResilience(Properties setup) {
     var resilience = setup.getProperty("resilience");
-    modelResilience.setValue(resilience != null ? Integer.parseInt(resilience) : 10);
+    modelResilience.setValue(resilience != null ? Integer.parseInt(resilience) : 100);
   }
 
   private void loadDestiny(Properties setup) {
