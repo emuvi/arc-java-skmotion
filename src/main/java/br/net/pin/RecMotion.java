@@ -20,8 +20,8 @@ import org.jcodec.common.model.Rational;
 
 public class RecMotion {
 
-  private static final long captureWait = 50;
-  private static final long antiEagerWait = 5;
+  private static final long captureWait = 80;
+  private static final long antiEagerWait = 8;
 
   private final Rectangle area;
   private final Dimension size;
@@ -128,7 +128,7 @@ public class RecMotion {
         SeekableByteChannel out = null;
         try {
           out = NIOUtils.writableFileChannel(destiny.getAbsolutePath());
-          var encoder = new AWTSequenceEncoder(out, Rational.R(20, 1));
+          var encoder = new AWTSequenceEncoder(out, Rational.R(12, 1));
           while (true) {
             var screen = toSave.pollFirst();
             if (screen != null) {
