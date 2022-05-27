@@ -159,6 +159,10 @@ public class RecMotion {
     stopTime = System.currentTimeMillis();
   }
 
+  public boolean isStopped() {
+    return !isCapturing.get();
+  }
+
   public long join() throws Exception {
     for (var thread : working) {
       thread.join();

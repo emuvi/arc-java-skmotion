@@ -183,6 +183,39 @@ public class Interface {
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setSize(330, frame.getMinimumSize().height);
     frame.setVisible(true);
+    initRecorderStatus();
+  }
+
+  private void initRecorderStatus() throws Exception {
+    new Thread("Recorder Status") {
+      @Override
+      public void run() {
+        var lastSaved = 0;
+        var lastDropped = 0;
+        while (frame.isDisplayable()) {
+          try {
+            Thread.sleep(1000);
+            if (recMotion != null && !recMotion.isStopped()) {
+              var dropped = recMotion.getDroppedFrames();
+              var saved = recMotion.getSavedFrames();
+              if (saved != lastSaved) {
+                lastSaved = saved;
+                SwingUtilities.invokeLater(() -> {
+                  labelStatus.setIcon(iconGreen);
+                });
+              } else if (dropped != lastDropped) {
+                lastDropped = dropped;
+                SwingUtilities.invokeLater(() -> {
+                  labelStatus.setIcon(iconRed);
+                });
+              }
+            }
+          } catch (Exception ex) {
+            ex.printStackTrace();
+          }
+        }
+      }
+    }.start();
   }
 
   private void doStartOrStop() throws Exception {
