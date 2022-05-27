@@ -23,8 +23,10 @@ public class RecMotion {
   private final Dimension size;
   private final File destiny;
   private final AtomicBoolean isCapturing = new AtomicBoolean(true);
-  private final Deque<BufferedImage> captured = new ConcurrentLinkedDeque<>();
-  private final long captureInterval = 100;
+  private final Deque<BufferedImage> toCheck = new ConcurrentLinkedDeque<>();
+  private final Deque<BufferedImage> toSave = new ConcurrentLinkedDeque<>();
+  private final long captureWait = 100;
+  private final long antiEagerWait = 30;
   private volatile long lastCaptured = 0;
   private volatile long startTime = System.currentTimeMillis();
 
@@ -40,7 +42,7 @@ public class RecMotion {
   private synchronized boolean isTimeToCapture() {
     var now = System.currentTimeMillis();
     var elapsed = now - lastCaptured;
-    var result = elapsed >= captureInterval;
+    var result = elapsed >= captureWait;
     if (result) {
       lastCaptured = now;
     }
@@ -54,11 +56,40 @@ public class RecMotion {
           var robot = new Robot();
           while (isCapturing.get()) {
             if (isTimeToCapture()) {
-              var all = robot.createScreenCapture(area);
-              var tmp = all.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH);
-              var screen = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
-              screen.createGraphics().drawImage(tmp, 0, 0, null);
-              captured.addLast(screen);
+              var screen = robot.createScreenCapture(area);
+              toCheck.addLast(screen);
+            } else {
+              Thread.sleep(antiEagerWait);
+            }
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    };
+    working.add(thread);
+    thread.start();
+  }
+
+  private void spawnCheckThread() {
+    var thread = new Thread(grouped, "Checking") {
+      public void run() {
+        try {
+          BufferedImage last = null;
+          while (true) {
+            var screen = toCheck.pollFirst();
+            if (screen != null) {
+              if (last == null || hasMotion(last, screen)) {
+                var scaled = screen.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH);
+                var result = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
+                result.createGraphics().drawImage(scaled, 0, 0, null);
+                toSave.addLast(result);
+                last = screen;
+              }
+            } else if (!isCapturing.get()) {
+              break;
+            } else {
+              Thread.sleep(antiEagerWait);
             }
           }
         } catch (Exception e) {
@@ -78,11 +109,13 @@ public class RecMotion {
           out = NIOUtils.writableFileChannel(destiny.getAbsolutePath());
           var encoder = new AWTSequenceEncoder(out, Rational.R(10, 1));
           while (true) {
-            var screen = captured.pollFirst();
+            var screen = toSave.pollFirst();
             if (screen != null) {
               encoder.encodeImage(screen);
             } else if (!isCapturing.get()) {
               break;
+            } else {
+              Thread.sleep(antiEagerWait);
             }
           }
           encoder.finish();
@@ -105,8 +138,10 @@ public class RecMotion {
     isCapturing.set(true);
     for (int i = 0; i < 2; i++) {
       spawnLoadThread(i);
-      Thread.sleep(captureInterval);
+      Thread.sleep(captureWait);
     }
+    spawnCheckThread();
+    Thread.sleep(antiEagerWait);
     spawnSaveThread();
   }
 
@@ -122,12 +157,13 @@ public class RecMotion {
     return System.currentTimeMillis() - startTime;
   }
 
-  private boolean hasChanged(BufferedImage img1, BufferedImage img2) {
+  private static boolean hasMotion(BufferedImage img1, BufferedImage img2) {
     if (img1.getWidth() == img2.getWidth() && img1.getHeight() == img2.getHeight()) {
       for (int x = 0; x < img1.getWidth(); x++) {
         for (int y = 0; y < img1.getHeight(); y++) {
-          if (img1.getRGB(x, y) != img2.getRGB(x, y))
+          if (img1.getRGB(x, y) != img2.getRGB(x, y)) {
             return true;
+          }
         }
       }
     } else {
