@@ -1,3 +1,3 @@
 # SkMotion
 
-SkMotion (Screen Motion) is a command program that records the frames of a screen when there is motion on it.
+SkMotion (Screen Motion) is an application for desktop that records the frames of a screen only when there is motion on it.
