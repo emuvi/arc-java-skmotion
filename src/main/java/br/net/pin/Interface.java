@@ -27,6 +27,7 @@ import javax.swing.SwingUtilities;
 
 public class Interface {
 
+  private final ImageIcon iconLogo = new ImageIcon(getClass().getResource("skmotion.png"));
   private final ImageIcon iconBlue = new ImageIcon(getClass().getResource("blue.png"));
   private final ImageIcon iconGreen = new ImageIcon(getClass().getResource("green.png"));
   private final ImageIcon iconRed = new ImageIcon(getClass().getResource("red.png"));
@@ -59,6 +60,7 @@ public class Interface {
   }
 
   private void setupComponents() {
+    frame.setIconImage(iconLogo.getImage());
     labelMonitor.setHorizontalAlignment(SwingConstants.RIGHT);
     labelResolution.setHorizontalAlignment(SwingConstants.RIGHT);
     labelSensitivity.setHorizontalAlignment(SwingConstants.RIGHT);
