@@ -40,11 +40,14 @@ public class Interface {
   private final JLabel labelResolution = new JLabel("Resolution:");
   private final DefaultComboBoxModel<String> modelResolution = new DefaultComboBoxModel<>();
   private final JComboBox<String> comboResolution = new JComboBox<String>(modelResolution);
-  private final JLabel labelDestiny = new JLabel("Destiny:");
-  private final JTextField textDestiny = new JTextField(60);
   private final JLabel labelSensitivity = new JLabel("Sensitivity:");
-  private final SpinnerNumberModel modelSensitivity = new SpinnerNumberModel(0.01f, 0.0f, 1.0f, 0.001f);
+  private final SpinnerNumberModel modelSensitivity = new SpinnerNumberModel(0.01, 0.0, 1.0, 0.001);
   private final JSpinner spinnerSensitivity = new JSpinner(modelSensitivity);
+  private final JLabel labelResilience = new JLabel("Resilience:");
+  private final SpinnerNumberModel modelResilience = new SpinnerNumberModel(10, 0, 10000, 1);
+  private final JSpinner spinnerResilience = new JSpinner(modelResilience);
+  private final JLabel labelDestiny = new JLabel("Destiny:");
+  private final JTextField textDestiny = new JTextField();
   private final JLabel labelStatus = new JLabel("Waiting...");
   private final JButton buttonAction = new JButton("Start");
 
@@ -58,8 +61,9 @@ public class Interface {
   private void setupComponents() {
     labelMonitor.setHorizontalAlignment(SwingConstants.RIGHT);
     labelResolution.setHorizontalAlignment(SwingConstants.RIGHT);
-    labelDestiny.setHorizontalAlignment(SwingConstants.RIGHT);
     labelSensitivity.setHorizontalAlignment(SwingConstants.RIGHT);
+    labelResilience.setHorizontalAlignment(SwingConstants.RIGHT);
+    labelDestiny.setHorizontalAlignment(SwingConstants.RIGHT);
     labelStatus.setVerticalTextPosition(SwingConstants.CENTER);
     labelStatus.setIcon(iconBlue);
     buttonAction.addActionListener((ev) -> {
@@ -98,26 +102,33 @@ public class Interface {
     like.gridx = 0;
     like.gridy = 2;
     like.weightx = 1.0;
-    pane.add(labelDestiny, like);
-    like.gridx = 1;
-    like.weightx = 3.0;
-    pane.add(textDestiny, like);
-    like.gridx = 0;
-    like.gridy = 3;
-    like.weightx = 1.0;
     pane.add(labelSensitivity, like);
     like.gridx = 1;
     like.weightx = 3.0;
     pane.add(spinnerSensitivity, like);
     like.gridx = 0;
+    like.gridy = 3;
+    like.weightx = 1.0;
+    pane.add(labelResilience, like);
+    like.gridx = 1;
+    like.weightx = 3.0;
+    pane.add(spinnerResilience, like);
+    like.gridx = 0;
     like.gridy = 4;
+    like.weightx = 1.0;
+    pane.add(labelDestiny, like);
+    like.gridx = 1;
+    like.weightx = 3.0;
+    pane.add(textDestiny, like);
+    like.gridx = 0;
+    like.gridy = 5;
     like.weightx = 1.0;
     pane.add(Box.createHorizontalGlue(), like);
     like.gridx = 1;
     like.weightx = 3.0;
     pane.add(labelStatus, like);
     like.gridx = 0;
-    like.gridy = 5;
+    like.gridy = 6;
     like.weightx = 1.0;
     pane.add(Box.createHorizontalGlue(), like);
     like.gridx = 1;
@@ -135,6 +146,7 @@ public class Interface {
     loadMonitors(setup);
     loadResolutions(setup);
     loadSensitivity(setup);
+    loadResilience(setup);
     loadDestiny(setup);
   }
 
@@ -163,6 +175,11 @@ public class Interface {
     modelSensitivity.setValue(sensitivity != null ? Double.parseDouble(sensitivity) : 0.01);
   }
 
+  private void loadResilience(Properties setup) {
+    var resilience = setup.getProperty("resilience");
+    modelResilience.setValue(resilience != null ? Integer.parseInt(resilience) : 10);
+  }
+
   private void loadDestiny(Properties setup) {
     var destiny = setup.getProperty("destiny");
     textDestiny.setText(destiny != null ? destiny : "recorder.mp4");
@@ -174,6 +191,7 @@ public class Interface {
     setup.setProperty("monitor", String.valueOf(comboMonitor.getSelectedItem()));
     setup.setProperty("resolution", String.valueOf(comboResolution.getSelectedItem()));
     setup.setProperty("sensitivity", String.valueOf(modelSensitivity.getValue()));
+    setup.setProperty("resilience", String.valueOf(modelResilience.getValue()));
     setup.setProperty("destiny", textDestiny.getText());
     setup.store(file, "SkMotion");
   }
@@ -245,7 +263,8 @@ public class Interface {
       var height = Integer.parseInt(parts[1]);
       var size = new Dimension(width, height);
       var sensitivity = ((Double) modelSensitivity.getValue()).floatValue();
-      recMotion = new RecMotion(area, size, new File(textDestiny.getText()), sensitivity);
+      var resilience = (Integer) modelResilience.getValue();
+      recMotion = new RecMotion(area, size, new File(textDestiny.getText()), sensitivity, resilience);
       recMotion.start();
       labelStatus.setText("Starting...");
       buttonAction.setText("Stop");
