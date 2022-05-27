@@ -177,7 +177,7 @@ public class Interface {
 
   private void loadResilience(Properties setup) {
     var resilience = setup.getProperty("resilience");
-    modelResilience.setValue(resilience != null ? Integer.parseInt(resilience) : 36);
+    modelResilience.setValue(resilience != null ? Integer.parseInt(resilience) : 30);
   }
 
   private void loadDestiny(Properties setup) {
