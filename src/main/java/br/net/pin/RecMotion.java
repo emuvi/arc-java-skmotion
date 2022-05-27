@@ -27,6 +27,7 @@ public class RecMotion {
   private final Dimension size;
   private final File destiny;
   private final Float sensitivity;
+  private final Integer resilience = 10;
   private final List<Thread> working = new ArrayList<>();
   private final ThreadGroup grouped = new ThreadGroup("RecMotion");
   private final AtomicBoolean isCapturing = new AtomicBoolean(true);
@@ -84,15 +85,17 @@ public class RecMotion {
       public void run() {
         try {
           BufferedImage last = null;
+          var resilienceGuard = resilience;
           while (true) {
             var screen = toCheck.pollFirst();
             if (screen != null) {
               if (last == null || hasMotion(last, screen)) {
-                var scaled = screen.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH);
-                var result = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
-                result.createGraphics().drawImage(scaled, 0, 0, null);
-                toSave.addLast(result);
+                send(screen);
                 last = screen;
+                resilienceGuard = resilience;
+              } else if (resilienceGuard > 0) {
+                send(screen);
+                resilienceGuard--;
               } else {
                 framesDropped.incrementAndGet();
               }
@@ -105,6 +108,13 @@ public class RecMotion {
         } catch (Exception e) {
           e.printStackTrace();
         }
+      }
+
+      private void send(BufferedImage screen) {
+        var scaled = screen.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH);
+        var result = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
+        result.createGraphics().drawImage(scaled, 0, 0, null);
+        toSave.addLast(result);
       }
     };
     working.add(thread);
