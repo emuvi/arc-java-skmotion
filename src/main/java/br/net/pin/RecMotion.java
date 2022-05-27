@@ -34,6 +34,8 @@ public class RecMotion {
   private final Deque<BufferedImage> toSave = new ConcurrentLinkedDeque<>();
   private final AtomicInteger framesSaved = new AtomicInteger(0);
   private final AtomicInteger framesDropped = new AtomicInteger(0);
+  private volatile float lastSavedDiffers = 0.0f;
+  private volatile float lastDroppedDiffers = 0.0f;
   private volatile long lastCaptured = 0;
   private volatile long startTime = System.currentTimeMillis();
   private volatile long stopTime = 0;
@@ -179,6 +181,14 @@ public class RecMotion {
     return framesDropped.get();
   }
 
+  public float getSavedDiffers() {
+    return lastSavedDiffers;
+  }
+
+  public float getDroppedDiffers() {
+    return lastDroppedDiffers;
+  }
+
   private boolean hasMotion(BufferedImage img1, BufferedImage img2) {
     var equals = 0;
     var entire = img1.getWidth() * img1.getHeight();
@@ -189,8 +199,13 @@ public class RecMotion {
         }
       }
     }
-    var differs = 1.0 - ((double) equals / entire);
-    System.out.println(String.format("%.5f", differs));
-    return differs > sensitivity;
+    var differs = 1.0f - ((float) equals / entire);
+    var result = differs > sensitivity;
+    if (result) {
+      lastSavedDiffers = differs;
+    } else {
+      lastDroppedDiffers = differs;
+    }
+    return result;
   }
 }

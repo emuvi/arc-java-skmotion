@@ -194,19 +194,23 @@ public class Interface {
         var lastDropped = 0;
         while (frame.isDisplayable()) {
           try {
-            Thread.sleep(1000);
+            Thread.sleep(500);
             if (recMotion != null && !recMotion.isStopped()) {
               var dropped = recMotion.getDroppedFrames();
               var saved = recMotion.getSavedFrames();
               if (saved != lastSaved) {
                 lastSaved = saved;
+                var differs = String.format("%.6f", recMotion.getSavedDiffers());
                 SwingUtilities.invokeLater(() -> {
                   labelStatus.setIcon(iconGreen);
+                  labelStatus.setText("Differs: " + differs);
                 });
               } else if (dropped != lastDropped) {
                 lastDropped = dropped;
+                var differs = String.format("%.6f", recMotion.getDroppedDiffers());
                 SwingUtilities.invokeLater(() -> {
                   labelStatus.setIcon(iconRed);
+                  labelStatus.setText("Differs: " + differs);
                 });
               }
             }
@@ -243,6 +247,7 @@ public class Interface {
       var sensitivity = ((Double) modelSensitivity.getValue()).floatValue();
       recMotion = new RecMotion(area, size, new File(textDestiny.getText()), sensitivity);
       recMotion.start();
+      labelStatus.setText("Starting...");
       buttonAction.setText("Stop");
       save();
     } else {
