@@ -90,7 +90,6 @@ public class RecMotion {
           e.printStackTrace();
         } finally {
           NIOUtils.closeQuietly(out);
-          System.out.println("Closed");
         }
       }
     };
