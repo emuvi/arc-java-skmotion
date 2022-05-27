@@ -26,7 +26,7 @@ public class RecMotion {
   private final Rectangle area;
   private final Dimension size;
   private final File destiny;
-  private final Float sensitivity = 0.1f;
+  private final Float sensitivity = 0.01f;
   private final List<Thread> working = new ArrayList<>();
   private final ThreadGroup grouped = new ThreadGroup("RecMotion");
   private final AtomicBoolean isCapturing = new AtomicBoolean(true);
@@ -185,7 +185,7 @@ public class RecMotion {
       }
     }
     var differs = 1.0 - ((double) equals / entire);
-    System.out.println(differs);
+    System.out.println(String.format("%.5f", differs));
     return differs > sensitivity;
   }
 }
