@@ -21,7 +21,7 @@ import org.jcodec.common.model.Rational;
 public class RecMotion {
 
   private static final long captureWait = 100;
-  private static final long antiEagerWait = 30;
+  private static final long antiEagerWait = 10;
 
   private final Rectangle area;
   private final Dimension size;
@@ -59,8 +59,8 @@ public class RecMotion {
     return result;
   }
 
-  private void spawnLoadThread(int index) {
-    var thread = new Thread(grouped, "Loading " + index) {
+  private void spawnLoadThread() {
+    var thread = new Thread(grouped, "Loading") {
       public void run() {
         try {
           var robot = new Robot();
@@ -158,10 +158,8 @@ public class RecMotion {
       throw new Exception("Already started");
     }
     isCapturing.set(true);
-    for (int i = 0; i < 2; i++) {
-      spawnLoadThread(i);
-      Thread.sleep(captureWait);
-    }
+    spawnLoadThread();
+    Thread.sleep(antiEagerWait);
     spawnCheckThread();
     Thread.sleep(antiEagerWait);
     spawnSaveThread();
