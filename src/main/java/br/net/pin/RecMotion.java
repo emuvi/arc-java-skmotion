@@ -11,6 +11,7 @@ import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jcodec.api.awt.AWTSequenceEncoder;
 import org.jcodec.common.io.NIOUtils;
@@ -19,16 +20,19 @@ import org.jcodec.common.model.Rational;
 
 public class RecMotion {
 
+  private static final long captureWait = 100;
+  private static final long antiEagerWait = 30;
+
   private final Rectangle area;
   private final Dimension size;
   private final File destiny;
   private final AtomicBoolean isCapturing = new AtomicBoolean(true);
   private final Deque<BufferedImage> toCheck = new ConcurrentLinkedDeque<>();
   private final Deque<BufferedImage> toSave = new ConcurrentLinkedDeque<>();
-  private final long captureWait = 100;
-  private final long antiEagerWait = 30;
   private volatile long lastCaptured = 0;
   private volatile long startTime = System.currentTimeMillis();
+  private final AtomicInteger framesSaved = new AtomicInteger(0);
+  private final AtomicInteger framesDropped = new AtomicInteger(0);
 
   private final ThreadGroup grouped = new ThreadGroup("RecMotion");
   private final List<Thread> working = new ArrayList<>();
@@ -85,6 +89,8 @@ public class RecMotion {
                 result.createGraphics().drawImage(scaled, 0, 0, null);
                 toSave.addLast(result);
                 last = screen;
+              } else {
+                framesDropped.incrementAndGet();
               }
             } else if (!isCapturing.get()) {
               break;
@@ -112,6 +118,7 @@ public class RecMotion {
             var screen = toSave.pollFirst();
             if (screen != null) {
               encoder.encodeImage(screen);
+              framesSaved.incrementAndGet();
             } else if (!isCapturing.get()) {
               break;
             } else {
