@@ -31,6 +31,7 @@ public class RecMotion {
   private final Deque<BufferedImage> toSave = new ConcurrentLinkedDeque<>();
   private volatile long lastCaptured = 0;
   private volatile long startTime = System.currentTimeMillis();
+  private volatile long stopTime = 0;
   private final AtomicInteger framesSaved = new AtomicInteger(0);
   private final AtomicInteger framesDropped = new AtomicInteger(0);
 
@@ -154,6 +155,7 @@ public class RecMotion {
 
   public void stop() {
     isCapturing.set(false);
+    stopTime = System.currentTimeMillis();
   }
 
   public long join() throws Exception {
@@ -161,7 +163,15 @@ public class RecMotion {
       thread.join();
     }
     working.clear();
-    return System.currentTimeMillis() - startTime;
+    return stopTime - startTime;
+  }
+
+  public int getSavedFrames() {
+    return framesSaved.get();
+  }
+
+  public int getDroppedFrames() {
+    return framesDropped.get();
   }
 
   private static boolean hasMotion(BufferedImage img1, BufferedImage img2) {

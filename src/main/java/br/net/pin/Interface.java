@@ -181,11 +181,21 @@ public class Interface {
         public void run() {
           try {
             var elapsed = recMotion.join();
+            var saved = recMotion.getSavedFrames();
+            var dropped = recMotion.getDroppedFrames();
             recMotion = null;
             SwingUtilities.invokeLater(() -> {
               buttonAction.setText("Start");
               buttonAction.setEnabled(true);
-              JOptionPane.showMessageDialog(frame, "Recording finished in " + formatTime(elapsed));
+              var message = new StringBuilder("Recorded for: ");
+              message.append(formatTime(elapsed));
+              message.append("\n");
+              message.append("Frames saved: ");
+              message.append(saved);
+              message.append("\n");
+              message.append("Frames dropped: ");
+              message.append(dropped);
+              JOptionPane.showMessageDialog(frame, message.toString());
             });
           } catch (Exception ex) {
             ex.printStackTrace();
