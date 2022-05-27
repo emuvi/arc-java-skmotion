@@ -27,17 +27,16 @@ public class RecMotion {
   private final Dimension size;
   private final File destiny;
   private final Float sensitivity = 0.1f;
+  private final List<Thread> working = new ArrayList<>();
+  private final ThreadGroup grouped = new ThreadGroup("RecMotion");
   private final AtomicBoolean isCapturing = new AtomicBoolean(true);
   private final Deque<BufferedImage> toCheck = new ConcurrentLinkedDeque<>();
   private final Deque<BufferedImage> toSave = new ConcurrentLinkedDeque<>();
+  private final AtomicInteger framesSaved = new AtomicInteger(0);
+  private final AtomicInteger framesDropped = new AtomicInteger(0);
   private volatile long lastCaptured = 0;
   private volatile long startTime = System.currentTimeMillis();
   private volatile long stopTime = 0;
-  private final AtomicInteger framesSaved = new AtomicInteger(0);
-  private final AtomicInteger framesDropped = new AtomicInteger(0);
-
-  private final ThreadGroup grouped = new ThreadGroup("RecMotion");
-  private final List<Thread> working = new ArrayList<>();
 
   public RecMotion(Rectangle area, Dimension size, File destiny) {
     this.area = area;
@@ -185,7 +184,7 @@ public class RecMotion {
         }
       }
     }
-    var differs = 1.0 - ((float) equals / entire);
+    var differs = 1.0 - ((double) equals / entire);
     System.out.println(differs);
     return differs > sensitivity;
   }
