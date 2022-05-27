@@ -47,8 +47,8 @@ public class RecMotion {
     return result;
   }
 
-  private void spawnCapturer(int index) {
-    var thread = new Thread(grouped, "Capturer " + index) {
+  private void spawnLoadThread(int index) {
+    var thread = new Thread(grouped, "Loading " + index) {
       public void run() {
         try {
           var robot = new Robot();
@@ -70,8 +70,8 @@ public class RecMotion {
     thread.start();
   }
 
-  private void spawnSaverMovie() {
-    var thread = new Thread(grouped, "Movie Saver") {
+  private void spawnSaveThread() {
+    var thread = new Thread(grouped, "Saving") {
       public void run() {
         SeekableByteChannel out = null;
         try {
@@ -104,10 +104,10 @@ public class RecMotion {
     }
     isCapturing.set(true);
     for (int i = 0; i < 2; i++) {
-      spawnCapturer(i);
+      spawnLoadThread(i);
       Thread.sleep(captureInterval);
     }
-    spawnSaverMovie();
+    spawnSaveThread();
   }
 
   public void stop() {
