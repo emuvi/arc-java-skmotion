@@ -13,6 +13,7 @@ import java.util.Properties;
 
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -25,6 +26,11 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 public class Interface {
+
+  private final ImageIcon iconBlue = new ImageIcon(getClass().getResource("blue.png"));
+  private final ImageIcon iconGreen = new ImageIcon(getClass().getResource("green.png"));
+  private final ImageIcon iconRed = new ImageIcon(getClass().getResource("red.png"));
+  private final ImageIcon iconYellow = new ImageIcon(getClass().getResource("yellow.png"));
 
   private final JFrame frame = new JFrame("SkMotion");
 
@@ -39,6 +45,7 @@ public class Interface {
   private final JLabel labelSensitivity = new JLabel("Sensitivity:");
   private final SpinnerNumberModel modelSensitivity = new SpinnerNumberModel(0.01f, 0.0f, 1.0f, 0.001f);
   private final JSpinner spinnerSensitivity = new JSpinner(modelSensitivity);
+  private final JLabel labelStatus = new JLabel("Waiting...");
   private final JButton buttonAction = new JButton("Start");
 
   private volatile RecMotion recMotion = null;
@@ -53,6 +60,8 @@ public class Interface {
     labelResolution.setHorizontalAlignment(SwingConstants.RIGHT);
     labelDestiny.setHorizontalAlignment(SwingConstants.RIGHT);
     labelSensitivity.setHorizontalAlignment(SwingConstants.RIGHT);
+    labelStatus.setVerticalTextPosition(SwingConstants.CENTER);
+    labelStatus.setIcon(iconBlue);
     buttonAction.addActionListener((ev) -> {
       try {
         doStartOrStop();
@@ -105,7 +114,13 @@ public class Interface {
     like.weightx = 1.0;
     pane.add(Box.createHorizontalGlue(), like);
     like.gridx = 1;
-    like.gridy = 4;
+    like.weightx = 3.0;
+    pane.add(labelStatus, like);
+    like.gridx = 0;
+    like.gridy = 5;
+    like.weightx = 1.0;
+    pane.add(Box.createHorizontalGlue(), like);
+    like.gridx = 1;
     like.weightx = 3.0;
     pane.add(buttonAction, like);
     frame.pack();
@@ -200,6 +215,9 @@ public class Interface {
     } else {
       recMotion.stop();
       buttonAction.setEnabled(false);
+      buttonAction.setText("Closing");
+      labelStatus.setIcon(iconYellow);
+      labelStatus.setText("Saving...");
       new Thread("Waiting to stop") {
         @Override
         public void run() {
@@ -209,6 +227,8 @@ public class Interface {
             var dropped = recMotion.getDroppedFrames();
             recMotion = null;
             SwingUtilities.invokeLater(() -> {
+              labelStatus.setIcon(iconBlue);
+              labelStatus.setText("Waiting...");
               buttonAction.setText("Start");
               buttonAction.setEnabled(true);
               var message = new StringBuilder("Recorded for: ");
