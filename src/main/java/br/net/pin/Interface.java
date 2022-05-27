@@ -18,7 +18,9 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
@@ -34,6 +36,9 @@ public class Interface {
   private final JComboBox<String> comboResolution = new JComboBox<String>(modelResolution);
   private final JLabel labelDestiny = new JLabel("Destiny:");
   private final JTextField textDestiny = new JTextField(60);
+  private final JLabel labelSensitivity = new JLabel("Sensitivity:");
+  private final SpinnerNumberModel modelSensitivity = new SpinnerNumberModel(0.01f, 0.0f, 1.0f, 0.001f);
+  private final JSpinner spinnerSensitivity = new JSpinner(modelSensitivity);
   private final JButton buttonAction = new JButton("Start");
 
   private volatile RecMotion recMotion = null;
@@ -47,6 +52,7 @@ public class Interface {
     labelMonitor.setHorizontalAlignment(SwingConstants.RIGHT);
     labelResolution.setHorizontalAlignment(SwingConstants.RIGHT);
     labelDestiny.setHorizontalAlignment(SwingConstants.RIGHT);
+    labelSensitivity.setHorizontalAlignment(SwingConstants.RIGHT);
     buttonAction.addActionListener((ev) -> {
       try {
         doStartOrStop();
@@ -90,9 +96,16 @@ public class Interface {
     like.gridx = 0;
     like.gridy = 3;
     like.weightx = 1.0;
+    pane.add(labelSensitivity, like);
+    like.gridx = 1;
+    like.weightx = 3.0;
+    pane.add(spinnerSensitivity, like);
+    like.gridx = 0;
+    like.gridy = 4;
+    like.weightx = 1.0;
     pane.add(Box.createHorizontalGlue(), like);
     like.gridx = 1;
-    like.gridy = 3;
+    like.gridy = 4;
     like.weightx = 3.0;
     pane.add(buttonAction, like);
     frame.pack();
@@ -106,6 +119,7 @@ public class Interface {
     }
     loadMonitors(setup);
     loadResolutions(setup);
+    loadSensitivity(setup);
     loadDestiny(setup);
   }
 
@@ -114,7 +128,8 @@ public class Interface {
     for (var display : ge.getScreenDevices()) {
       modelMonitor.addElement(display.getIDstring());
     }
-    comboMonitor.setSelectedItem(setup.getProperty("monitor"));
+    var monitor = setup.getProperty("monitor");
+    comboMonitor.setSelectedItem(monitor != null ? monitor : modelMonitor.getElementAt(0));
   }
 
   private void loadResolutions(Properties setup) {
@@ -124,11 +139,18 @@ public class Interface {
     modelResolution.addElement("1280x720");
     modelResolution.addElement("1600x900");
     modelResolution.addElement("1920x1080");
-    comboResolution.setSelectedItem(setup.getProperty("resolution"));
+    var resolution = setup.getProperty("resolution");
+    comboResolution.setSelectedItem(resolution != null ? resolution : modelResolution.getElementAt(0));
+  }
+
+  private void loadSensitivity(Properties setup) {
+    var sensitivity = setup.getProperty("sensitivity");
+    modelSensitivity.setValue(sensitivity != null ? Double.parseDouble(sensitivity) : 0.01);
   }
 
   private void loadDestiny(Properties setup) {
-    textDestiny.setText(setup.getProperty("destiny"));
+    var destiny = setup.getProperty("destiny");
+    textDestiny.setText(destiny != null ? destiny : "recorder.mp4");
   }
 
   private void save() throws Exception {
@@ -136,6 +158,7 @@ public class Interface {
     var setup = new Properties();
     setup.setProperty("monitor", String.valueOf(comboMonitor.getSelectedItem()));
     setup.setProperty("resolution", String.valueOf(comboResolution.getSelectedItem()));
+    setup.setProperty("sensitivity", String.valueOf(modelSensitivity.getValue()));
     setup.setProperty("destiny", textDestiny.getText());
     setup.store(file, "SkMotion");
   }
@@ -143,7 +166,7 @@ public class Interface {
   public void show() throws Exception {
     load();
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setSize(360, frame.getMinimumSize().height);
+    frame.setSize(330, frame.getMinimumSize().height);
     frame.setVisible(true);
   }
 
@@ -169,7 +192,8 @@ public class Interface {
       var width = Integer.parseInt(parts[0]);
       var height = Integer.parseInt(parts[1]);
       var size = new Dimension(width, height);
-      recMotion = new RecMotion(area, size, new File(textDestiny.getText()));
+      var sensitivity = ((Double) modelSensitivity.getValue()).floatValue();
+      recMotion = new RecMotion(area, size, new File(textDestiny.getText()), sensitivity);
       recMotion.start();
       buttonAction.setText("Stop");
       save();

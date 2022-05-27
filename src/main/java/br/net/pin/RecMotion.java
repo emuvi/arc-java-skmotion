@@ -26,7 +26,7 @@ public class RecMotion {
   private final Rectangle area;
   private final Dimension size;
   private final File destiny;
-  private final Float sensitivity = 0.01f;
+  private final Float sensitivity;
   private final List<Thread> working = new ArrayList<>();
   private final ThreadGroup grouped = new ThreadGroup("RecMotion");
   private final AtomicBoolean isCapturing = new AtomicBoolean(true);
@@ -38,10 +38,11 @@ public class RecMotion {
   private volatile long startTime = System.currentTimeMillis();
   private volatile long stopTime = 0;
 
-  public RecMotion(Rectangle area, Dimension size, File destiny) {
+  public RecMotion(Rectangle area, Dimension size, File destiny, Float sensitivity) {
     this.area = area;
     this.size = size;
     this.destiny = destiny;
+    this.sensitivity = sensitivity;
   }
 
   private synchronized boolean isTimeToCapture() {
