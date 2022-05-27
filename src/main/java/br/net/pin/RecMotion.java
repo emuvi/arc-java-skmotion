@@ -21,7 +21,7 @@ import org.jcodec.common.model.Rational;
 public class RecMotion {
 
   private static final long captureWait = 80;
-  private static final long antiEagerWait = 8;
+  private static final long antiEagerWait = 16;
 
   private final Rectangle area;
   private final Dimension size;
