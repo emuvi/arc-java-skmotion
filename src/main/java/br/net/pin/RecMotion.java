@@ -26,6 +26,7 @@ public class RecMotion {
   private final Rectangle area;
   private final Dimension size;
   private final File destiny;
+  private final Float sensitivity = 0.1f;
   private final AtomicBoolean isCapturing = new AtomicBoolean(true);
   private final Deque<BufferedImage> toCheck = new ConcurrentLinkedDeque<>();
   private final Deque<BufferedImage> toSave = new ConcurrentLinkedDeque<>();
@@ -174,18 +175,18 @@ public class RecMotion {
     return framesDropped.get();
   }
 
-  private static boolean hasMotion(BufferedImage img1, BufferedImage img2) {
-    if (img1.getWidth() == img2.getWidth() && img1.getHeight() == img2.getHeight()) {
-      for (int x = 0; x < img1.getWidth(); x++) {
-        for (int y = 0; y < img1.getHeight(); y++) {
-          if (img1.getRGB(x, y) != img2.getRGB(x, y)) {
-            return true;
-          }
+  private boolean hasMotion(BufferedImage img1, BufferedImage img2) {
+    var equals = 0;
+    var entire = img1.getWidth() * img1.getHeight();
+    for (int x = 0; x < img1.getWidth(); x++) {
+      for (int y = 0; y < img1.getHeight(); y++) {
+        if (img1.getRGB(x, y) == img2.getRGB(x, y)) {
+          equals++;
         }
       }
-    } else {
-      return true;
     }
-    return false;
+    var differs = 1.0 - ((float) equals / entire);
+    System.out.println(differs);
+    return differs > sensitivity;
   }
 }
