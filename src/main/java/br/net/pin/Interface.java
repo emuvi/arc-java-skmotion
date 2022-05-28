@@ -7,6 +7,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -175,8 +177,8 @@ public class Interface {
     for (var display : ge.getScreenDevices()) {
       modelScreen.addElement(display.getIDstring());
     }
-    var Screen = setup.getProperty("Screen");
-    comboScreen.setSelectedItem(Screen != null ? Screen : modelScreen.getElementAt(0));
+    var screen = setup.getProperty("Screen");
+    comboScreen.setSelectedItem(screen != null ? screen : modelScreen.getElementAt(0));
   }
 
   private void loadResolutions(Properties setup) {
@@ -218,11 +220,11 @@ public class Interface {
   }
 
   private void showScreenIndicator() throws Exception {
-    var Screen = String.valueOf(comboScreen.getSelectedItem());
+    var screen = String.valueOf(comboScreen.getSelectedItem());
     var graphics = GraphicsEnvironment.getLocalGraphicsEnvironment();
     Rectangle area = null;
     for (var device : graphics.getScreenDevices()) {
-      if (Screen == device.getIDstring()) {
+      if (screen == device.getIDstring()) {
         area = device.getDefaultConfiguration().getBounds();
         break;
       }
@@ -242,6 +244,13 @@ public class Interface {
     indicator.addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
+        indicator.setVisible(false);
+        indicator.dispose();
+      }
+    });
+    indicator.addKeyListener(new KeyAdapter() {
+      @Override
+      public void keyPressed(KeyEvent e) {
         indicator.setVisible(false);
         indicator.dispose();
       }
@@ -295,11 +304,11 @@ public class Interface {
 
   private void doStartOrStop() throws Exception {
     if (recMotion == null) {
-      var Screen = String.valueOf(comboScreen.getSelectedItem());
+      var screen = String.valueOf(comboScreen.getSelectedItem());
       var graphics = GraphicsEnvironment.getLocalGraphicsEnvironment();
       Rectangle area = null;
       for (var device : graphics.getScreenDevices()) {
-        if (Screen == device.getIDstring()) {
+        if (screen == device.getIDstring()) {
           area = device.getDefaultConfiguration().getBounds();
           break;
         }
