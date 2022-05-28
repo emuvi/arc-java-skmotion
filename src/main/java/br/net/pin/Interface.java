@@ -34,6 +34,14 @@ import javax.swing.SwingUtilities;
 
 public class Interface {
 
+  private static final File appFolder = new File(System.getProperty("user.home"), "SkMotion");
+
+  static {
+    if (!appFolder.exists()) {
+      appFolder.mkdirs();
+    }
+  }
+
   private final ImageIcon iconLogo = new ImageIcon(getClass().getResource("logo.png"));
   private final ImageIcon iconBlue = new ImageIcon(getClass().getResource("blue.png"));
   private final ImageIcon iconGreen = new ImageIcon(getClass().getResource("green.png"));
@@ -55,7 +63,7 @@ public class Interface {
   private final SpinnerNumberModel modelResilience = new SpinnerNumberModel(10, 0, 1_000_000, 1);
   private final JSpinner spinnerResilience = new JSpinner(modelResilience);
   private final JButton buttonDestiny = new JButton("Destiny");
-  private final JTextField textDestiny = new JTextField();
+  private final JTextField textDestiny = new JTextField(60);
   private final JLabel labelStatus = new JLabel("Waiting to start...");
   private final JButton buttonAbout = new JButton("About");
   private final JButton buttonAction = new JButton("Start");
@@ -161,7 +169,7 @@ public class Interface {
 
   private void load() throws Exception {
     var setup = new Properties();
-    var file = new File("skmotion.ini");
+    var file = new File(appFolder, "skmotion.ini");
     if (file.exists()) {
       setup.load(new FileInputStream(file));
     }
@@ -214,11 +222,12 @@ public class Interface {
 
   private void loadDestiny(Properties setup) {
     var destiny = setup.getProperty("destiny");
-    textDestiny.setText(destiny != null ? destiny : "records");
+    var records = new File(appFolder, "records");
+    textDestiny.setText(destiny != null ? destiny : records.getAbsolutePath());
   }
 
   private void save() throws Exception {
-    var file = new FileOutputStream("skmotion.ini");
+    var file = new FileOutputStream(new File(appFolder, "skmotion.ini"));
     var setup = new Properties();
     setup.setProperty("posX", String.valueOf(frame.getLocation().x));
     setup.setProperty("posY", String.valueOf(frame.getLocation().y));
