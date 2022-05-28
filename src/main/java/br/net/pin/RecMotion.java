@@ -6,6 +6,8 @@ import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
@@ -22,6 +24,8 @@ public class RecMotion {
 
   private static final long captureWait = 100;
   private static final long antiEagerWait = 10;
+
+  private static final SimpleDateFormat formatForNames = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
   private final Rectangle area;
   private final Dimension size;
@@ -127,7 +131,7 @@ public class RecMotion {
       public void run() {
         SeekableByteChannel out = null;
         try {
-          out = NIOUtils.writableFileChannel(destiny.getAbsolutePath());
+          out = NIOUtils.writableFileChannel(getPath());
           var encoder = new AWTSequenceEncoder(out, Rational.R(10, 1));
           while (true) {
             var screen = toSave.pollFirst();
@@ -146,6 +150,13 @@ public class RecMotion {
         } finally {
           NIOUtils.closeQuietly(out);
         }
+      }
+
+      private String getPath() throws Exception {
+        Files.createDirectories(destiny.toPath());
+        var now = System.currentTimeMillis();
+        var fileDestiny = new File(destiny, formatForNames.format(now) + ".mp4");
+        return fileDestiny.getAbsolutePath();
       }
     };
     working.add(thread);

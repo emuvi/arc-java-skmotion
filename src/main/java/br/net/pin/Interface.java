@@ -184,7 +184,7 @@ public class Interface {
 
   private void loadDestiny(Properties setup) {
     var destiny = setup.getProperty("destiny");
-    textDestiny.setText(destiny != null ? destiny : "recorder.mp4");
+    textDestiny.setText(destiny != null ? destiny : "records");
   }
 
   private void save() throws Exception {
@@ -266,7 +266,8 @@ public class Interface {
       var size = new Dimension(width, height);
       var sensitivity = ((Double) modelSensitivity.getValue()).floatValue();
       var resilience = (Integer) modelResilience.getValue();
-      recMotion = new RecMotion(area, size, new File(textDestiny.getText()), sensitivity, resilience);
+      var destiny = new File(textDestiny.getText());
+      recMotion = new RecMotion(area, size, destiny, sensitivity, resilience);
       recMotion.start();
       labelStatus.setText("Starting...");
       buttonAction.setText("Stop");

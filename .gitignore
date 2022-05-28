@@ -2,4 +2,5 @@ jre/
 dist/
 build/
 target/
+records/
 skmotion.ini
