@@ -52,7 +52,7 @@ public class Interface {
   private final JSpinner spinnerResilience = new JSpinner(modelResilience);
   private final JLabel labelDestiny = new JLabel("Destiny:");
   private final JTextField textDestiny = new JTextField();
-  private final JLabel labelStatus = new JLabel("Waiting...");
+  private final JLabel labelStatus = new JLabel("Waiting to start...");
   private final JButton buttonAction = new JButton("Start");
 
   private volatile RecMotion recMotion = null;
@@ -266,14 +266,14 @@ public class Interface {
                 var differs = String.format("%.6f", recMotion.getSavedDiffers());
                 SwingUtilities.invokeLater(() -> {
                   labelStatus.setIcon(iconGreen);
-                  labelStatus.setText("Motion: " + differs);
+                  labelStatus.setText("Motion save: " + differs);
                 });
               } else if (dropped != lastDropped) {
                 lastDropped = dropped;
                 var differs = String.format("%.6f", recMotion.getDroppedDiffers());
                 SwingUtilities.invokeLater(() -> {
                   labelStatus.setIcon(iconRed);
-                  labelStatus.setText("Differs: " + differs);
+                  labelStatus.setText("Motion drop: " + differs);
                 });
               }
             }
@@ -312,7 +312,7 @@ public class Interface {
       var destiny = new File(textDestiny.getText());
       recMotion = new RecMotion(area, size, destiny, sensitivity, resilience);
       recMotion.start();
-      labelStatus.setText("Starting...");
+      labelStatus.setText("Starting to record...");
       buttonAction.setText("Stop");
       save();
     } else {
@@ -320,7 +320,7 @@ public class Interface {
       buttonAction.setEnabled(false);
       buttonAction.setText("Closing");
       labelStatus.setIcon(iconYellow);
-      labelStatus.setText("Saving...");
+      labelStatus.setText("Closing the record...");
       new Thread("Waiting to stop") {
         @Override
         public void run() {
@@ -331,7 +331,7 @@ public class Interface {
             recMotion = null;
             SwingUtilities.invokeLater(() -> {
               labelStatus.setIcon(iconBlue);
-              labelStatus.setText("Waiting...");
+              labelStatus.setText("Waiting to start...");
               buttonAction.setText("Start");
               buttonAction.setEnabled(true);
               var message = new StringBuilder("Recorded for: ");
