@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg2"
+   width="256"
+   height="256"
+   viewBox="0 0 256 256"
+   sodipodi:docname="skmotion.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   inkscape:export-filename="skmotion.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs6" />
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     showgrid="false"
+     inkscape:zoom="0.85349996"
+     inkscape:cx="123.60868"
+     inkscape:cy="108.37728"
+     inkscape:window-width="1920"
+     inkscape:window-height="1013"
+     inkscape:window-x="-9"
+     inkscape:window-y="29"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g8"
+     width="256px" />
+  <g
+     inkscape:groupmode="layer"
+     inkscape:label="Image"
+     id="g8">
+    <circle
+       style="fill:#666666;stroke:#000000;stroke-width:7.54987;stroke-miterlimit:4;stroke-dasharray:none"
+       id="circle1213"
+       cx="128"
+       cy="128"
+       r="124.22507" />
+    <circle
+       style="fill:#808080;stroke:#000000;stroke-width:7.25556;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path1109"
+       cx="128"
+       cy="128"
+       r="105.41183" />
+    <circle
+       style="fill:#d40000;stroke:#000000;stroke-width:7.54987;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path969"
+       cx="128"
+       cy="128"
+       r="48.951252" />
+  </g>
+</svg>
