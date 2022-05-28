@@ -84,6 +84,7 @@ public class Interface {
       JOptionPane.showMessageDialog(frame, "SkMotion\n\n" +
           "SkMotion (Screen Motion) is an application for desktop that\n" +
           "records the frames of a screen only when there is motion on it.\n\n" +
+          "This application was developed to record video logs of a screen.\n\n" +
           "Source code on https://github.com/emuvi/skmotion\n\n" +
           "Copyright (C) 2022  Éverton M. Vieira\n\n" +
           "Version: 0.1.0\n", "About", JOptionPane.INFORMATION_MESSAGE);
