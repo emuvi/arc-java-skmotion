@@ -1,6 +1,7 @@
 package br.net.pin;
 
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
@@ -14,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.nio.file.Files;
 import java.util.Properties;
 
 import javax.swing.Box;
@@ -52,7 +54,7 @@ public class Interface {
   private final JLabel labelResilience = new JLabel("Resilience:");
   private final SpinnerNumberModel modelResilience = new SpinnerNumberModel(10, 0, 1_000_000, 1);
   private final JSpinner spinnerResilience = new JSpinner(modelResilience);
-  private final JLabel labelDestiny = new JLabel("Destiny:");
+  private final JButton buttonDestiny = new JButton("Destiny");
   private final JTextField textDestiny = new JTextField();
   private final JLabel labelStatus = new JLabel("Waiting to start...");
   private final JButton buttonAbout = new JButton("About");
@@ -77,7 +79,13 @@ public class Interface {
     labelResolution.setHorizontalAlignment(SwingConstants.RIGHT);
     labelSensitivity.setHorizontalAlignment(SwingConstants.RIGHT);
     labelResilience.setHorizontalAlignment(SwingConstants.RIGHT);
-    labelDestiny.setHorizontalAlignment(SwingConstants.RIGHT);
+    buttonDestiny.addActionListener((ev) -> {
+      try {
+        showDestiny();
+      } catch (Exception ex) {
+        JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      }
+    });
     labelStatus.setVerticalTextPosition(SwingConstants.CENTER);
     labelStatus.setIcon(iconBlue);
     buttonAbout.addActionListener((ev) -> {
@@ -130,7 +138,7 @@ public class Interface {
     pane.add(spinnerResilience, like);
     like.gridx = 0;
     like.gridy = 4;
-    pane.add(labelDestiny, like);
+    pane.add(buttonDestiny, like);
     like.gridx = 1;
     pane.add(textDestiny, like);
     like.gridx = 0;
@@ -259,6 +267,12 @@ public class Interface {
       }
     });
     indicator.setVisible(true);
+  }
+
+  public void showDestiny() throws Exception {
+    var destiny = new File(textDestiny.getText());
+    Files.createDirectories(destiny.toPath());
+    Desktop.getDesktop().open(destiny);
   }
 
   public void show() throws Exception {
