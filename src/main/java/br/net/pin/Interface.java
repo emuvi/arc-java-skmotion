@@ -1,11 +1,14 @@
 package br.net.pin;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -35,7 +38,7 @@ public class Interface {
 
   private final JFrame frame = new JFrame("SkMotion");
 
-  private final JLabel labelMonitor = new JLabel("Monitor:");
+  private final JButton buttonMonitor = new JButton("Monitor:");
   private final DefaultComboBoxModel<String> modelMonitor = new DefaultComboBoxModel<>();
   private final JComboBox<String> comboMonitor = new JComboBox<>(modelMonitor);
   private final JLabel labelResolution = new JLabel("Resolution:");
@@ -61,7 +64,14 @@ public class Interface {
 
   private void setupComponents() {
     frame.setIconImage(iconLogo.getImage());
-    labelMonitor.setHorizontalAlignment(SwingConstants.RIGHT);
+    buttonMonitor.setHorizontalAlignment(SwingConstants.RIGHT);
+    buttonMonitor.addActionListener((ev) -> {
+      try {
+        showMonitorIndicator();
+      } catch (Exception ex) {
+        JOptionPane.showMessageDialog(frame, ex.getMessage());
+      }
+    });
     labelResolution.setHorizontalAlignment(SwingConstants.RIGHT);
     labelSensitivity.setHorizontalAlignment(SwingConstants.RIGHT);
     labelResilience.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -90,7 +100,7 @@ public class Interface {
     like.gridx = 0;
     like.gridy = 0;
     like.weightx = 1.0;
-    pane.add(labelMonitor, like);
+    pane.add(buttonMonitor, like);
     like.gridx = 1;
     like.weightx = 3.0;
     pane.add(comboMonitor, like);
@@ -196,6 +206,38 @@ public class Interface {
     setup.setProperty("resilience", String.valueOf(modelResilience.getValue()));
     setup.setProperty("destiny", textDestiny.getText());
     setup.store(file, "SkMotion");
+  }
+
+  private void showMonitorIndicator() throws Exception {
+    var monitor = String.valueOf(comboMonitor.getSelectedItem());
+    var graphics = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    Rectangle area = null;
+    for (var device : graphics.getScreenDevices()) {
+      if (monitor == device.getIDstring()) {
+        area = device.getDefaultConfiguration().getBounds();
+        break;
+      }
+    }
+    if (area == null) {
+      throw new Exception("Monitor not found");
+    }
+    var indicator = new JFrame("Monitor Indicator");
+    indicator.setIconImage(iconLogo.getImage());
+    indicator.setUndecorated(true);
+    indicator.setAlwaysOnTop(true);
+    indicator.setLocation(area.x, area.y);
+    indicator.setSize(area.width, area.height);
+    indicator.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    indicator.setBackground(Color.BLACK);
+    indicator.setOpacity(0.54f);
+    indicator.addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseClicked(MouseEvent e) {
+        indicator.setVisible(false);
+        indicator.dispose();
+      }
+    });
+    indicator.setVisible(true);
   }
 
   public void show() throws Exception {
