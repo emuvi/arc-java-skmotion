@@ -266,7 +266,7 @@ public class Interface {
                 var differs = String.format("%.6f", recMotion.getSavedDiffers());
                 SwingUtilities.invokeLater(() -> {
                   labelStatus.setIcon(iconGreen);
-                  labelStatus.setText("Differs: " + differs);
+                  labelStatus.setText("Motion: " + differs);
                 });
               } else if (dropped != lastDropped) {
                 lastDropped = dropped;
