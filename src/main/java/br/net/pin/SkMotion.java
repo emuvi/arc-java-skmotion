@@ -1,7 +1,5 @@
 package br.net.pin;
 
-import java.awt.RenderingHints;
-
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
@@ -12,8 +10,6 @@ public class SkMotion {
     SwingUtilities.invokeLater(() -> {
       try {
         UIManager.setLookAndFeel(new FlatDarculaLaf());
-        UIManager.getLookAndFeelDefaults().put(RenderingHints.KEY_TEXT_ANTIALIASING,
-            RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         new Interface().show();
       } catch (Exception e) {
         e.printStackTrace();
