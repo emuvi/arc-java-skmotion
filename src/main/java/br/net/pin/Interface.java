@@ -38,9 +38,9 @@ public class Interface {
 
   private final JFrame frame = new JFrame("SkMotion");
 
-  private final JButton buttonMonitor = new JButton("Monitor:");
-  private final DefaultComboBoxModel<String> modelMonitor = new DefaultComboBoxModel<>();
-  private final JComboBox<String> comboMonitor = new JComboBox<>(modelMonitor);
+  private final JButton buttonScreen = new JButton("Screen");
+  private final DefaultComboBoxModel<String> modelScreen = new DefaultComboBoxModel<>();
+  private final JComboBox<String> comboScreen = new JComboBox<>(modelScreen);
   private final JLabel labelResolution = new JLabel("Resolution:");
   private final DefaultComboBoxModel<String> modelResolution = new DefaultComboBoxModel<>();
   private final JComboBox<String> comboResolution = new JComboBox<String>(modelResolution);
@@ -53,6 +53,7 @@ public class Interface {
   private final JLabel labelDestiny = new JLabel("Destiny:");
   private final JTextField textDestiny = new JTextField();
   private final JLabel labelStatus = new JLabel("Waiting to start...");
+  private final JButton buttonAbout = new JButton("About");
   private final JButton buttonAction = new JButton("Start");
 
   private volatile RecMotion recMotion = null;
@@ -64,12 +65,11 @@ public class Interface {
 
   private void setupComponents() {
     frame.setIconImage(iconLogo.getImage());
-    buttonMonitor.setHorizontalAlignment(SwingConstants.RIGHT);
-    buttonMonitor.addActionListener((ev) -> {
+    buttonScreen.addActionListener((ev) -> {
       try {
-        showMonitorIndicator();
+        showScreenIndicator();
       } catch (Exception ex) {
-        JOptionPane.showMessageDialog(frame, ex.getMessage());
+        JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
       }
     });
     labelResolution.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -78,11 +78,19 @@ public class Interface {
     labelDestiny.setHorizontalAlignment(SwingConstants.RIGHT);
     labelStatus.setVerticalTextPosition(SwingConstants.CENTER);
     labelStatus.setIcon(iconBlue);
+    buttonAbout.addActionListener((ev) -> {
+      JOptionPane.showMessageDialog(frame, "SkMotion\n\n" +
+          "SkMotion (Screen Motion) is an application for desktop that\n" +
+          "records the frames of a screen only when there is motion on it.\n\n" +
+          "Source code on https://github.com/emuvi/skmotion\n\n" +
+          "Copyright (C) 2022  Éverton M. Vieira\n\n" +
+          "Version: 0.1.0\n", "About", JOptionPane.INFORMATION_MESSAGE);
+    });
     buttonAction.addActionListener((ev) -> {
       try {
         doStartOrStop();
       } catch (Exception ex) {
-        JOptionPane.showMessageDialog(frame, ex.getMessage());
+        JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
       }
     });
   }
@@ -100,10 +108,10 @@ public class Interface {
     like.gridx = 0;
     like.gridy = 0;
     like.weightx = 1.0;
-    pane.add(buttonMonitor, like);
+    pane.add(buttonScreen, like);
     like.gridx = 1;
     like.weightx = 3.0;
-    pane.add(comboMonitor, like);
+    pane.add(comboScreen, like);
     like.gridx = 0;
     like.gridy = 1;
     like.weightx = 1.0;
@@ -142,7 +150,7 @@ public class Interface {
     like.gridx = 0;
     like.gridy = 6;
     like.weightx = 1.0;
-    pane.add(Box.createHorizontalGlue(), like);
+    pane.add(buttonAbout, like);
     like.gridx = 1;
     like.weightx = 3.0;
     pane.add(buttonAction, like);
@@ -155,20 +163,20 @@ public class Interface {
     if (file.exists()) {
       setup.load(new FileInputStream(file));
     }
-    loadMonitors(setup);
+    loadScreens(setup);
     loadResolutions(setup);
     loadSensitivity(setup);
     loadResilience(setup);
     loadDestiny(setup);
   }
 
-  private void loadMonitors(Properties setup) {
+  private void loadScreens(Properties setup) {
     GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     for (var display : ge.getScreenDevices()) {
-      modelMonitor.addElement(display.getIDstring());
+      modelScreen.addElement(display.getIDstring());
     }
-    var monitor = setup.getProperty("monitor");
-    comboMonitor.setSelectedItem(monitor != null ? monitor : modelMonitor.getElementAt(0));
+    var Screen = setup.getProperty("Screen");
+    comboScreen.setSelectedItem(Screen != null ? Screen : modelScreen.getElementAt(0));
   }
 
   private void loadResolutions(Properties setup) {
@@ -201,7 +209,7 @@ public class Interface {
   private void save() throws Exception {
     var file = new FileOutputStream("skmotion.ini");
     var setup = new Properties();
-    setup.setProperty("monitor", String.valueOf(comboMonitor.getSelectedItem()));
+    setup.setProperty("Screen", String.valueOf(comboScreen.getSelectedItem()));
     setup.setProperty("resolution", String.valueOf(comboResolution.getSelectedItem()));
     setup.setProperty("sensitivity", String.valueOf(modelSensitivity.getValue()));
     setup.setProperty("resilience", String.valueOf(modelResilience.getValue()));
@@ -209,20 +217,20 @@ public class Interface {
     setup.store(file, "SkMotion");
   }
 
-  private void showMonitorIndicator() throws Exception {
-    var monitor = String.valueOf(comboMonitor.getSelectedItem());
+  private void showScreenIndicator() throws Exception {
+    var Screen = String.valueOf(comboScreen.getSelectedItem());
     var graphics = GraphicsEnvironment.getLocalGraphicsEnvironment();
     Rectangle area = null;
     for (var device : graphics.getScreenDevices()) {
-      if (monitor == device.getIDstring()) {
+      if (Screen == device.getIDstring()) {
         area = device.getDefaultConfiguration().getBounds();
         break;
       }
     }
     if (area == null) {
-      throw new Exception("Monitor not found");
+      throw new Exception("Screen not found");
     }
-    var indicator = new JFrame("Monitor Indicator");
+    var indicator = new JFrame("Screen Indicator");
     indicator.setIconImage(iconLogo.getImage());
     indicator.setUndecorated(true);
     indicator.setAlwaysOnTop(true);
@@ -287,17 +295,17 @@ public class Interface {
 
   private void doStartOrStop() throws Exception {
     if (recMotion == null) {
-      var monitor = String.valueOf(comboMonitor.getSelectedItem());
+      var Screen = String.valueOf(comboScreen.getSelectedItem());
       var graphics = GraphicsEnvironment.getLocalGraphicsEnvironment();
       Rectangle area = null;
       for (var device : graphics.getScreenDevices()) {
-        if (monitor == device.getIDstring()) {
+        if (Screen == device.getIDstring()) {
           area = device.getDefaultConfiguration().getBounds();
           break;
         }
       }
       if (area == null) {
-        throw new Exception("Monitor not found");
+        throw new Exception("Screen not found");
       }
       var resolution = String.valueOf(comboResolution.getSelectedItem());
       var parts = resolution.split("x");
