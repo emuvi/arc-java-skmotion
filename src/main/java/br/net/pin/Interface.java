@@ -103,7 +103,7 @@ public class Interface {
           "This application was developed to record video logs of a screen.\n\n" +
           "Source code on https://github.com/emuvi/skmotion\n\n" +
           "Copyright (C) 2022  Éverton M. Vieira\n\n" +
-          "Version: 0.1.0\n", "About", JOptionPane.INFORMATION_MESSAGE);
+          "Version: 0.1.1\n", "About", JOptionPane.INFORMATION_MESSAGE);
     });
     buttonAction.addActionListener((ev) -> {
       try {

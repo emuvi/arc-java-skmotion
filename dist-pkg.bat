@@ -1,1 +1,1 @@
-jpackage --runtime-image ./jre --input ./build --dest ./dist --main-jar skmotion.jar --name "SkMotion" --app-version 0.1.0 --icon src\main\resources\br\net\pin\skmotion.ico --win-dir-chooser --win-menu --win-menu-group "SkMotion"
+jpackage --runtime-image ./jre --input ./build --dest ./dist --main-jar skmotion.jar --name "SkMotion" --app-version 0.1.1 --icon src\main\resources\br\net\pin\skmotion.ico --win-dir-chooser --win-menu --win-menu-group "SkMotion"
