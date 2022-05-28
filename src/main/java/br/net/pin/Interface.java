@@ -326,22 +326,30 @@ public class Interface {
         public void run() {
           try {
             var elapsed = recMotion.join();
-            var saved = recMotion.getSavedFrames();
-            var dropped = recMotion.getDroppedFrames();
+            var framesSave = recMotion.getSavedFrames();
+            var framesDrop = recMotion.getDroppedFrames();
+            var framesTotal = framesSave + framesDrop;
+            var framesSavePer = String.format("%.2f", framesSave * 100.0 / framesTotal);
+            var framesDropPer = String.format("%.2f", framesDrop * 100.0 / framesTotal);
             recMotion = null;
             SwingUtilities.invokeLater(() -> {
               labelStatus.setIcon(iconBlue);
               labelStatus.setText("Waiting to start...");
               buttonAction.setText("Start");
               buttonAction.setEnabled(true);
-              var message = new StringBuilder("Recorded for: ");
+              var message = new StringBuilder("Recorded for ");
               message.append(formatTime(elapsed));
               message.append("\n");
-              message.append("Frames saved: ");
-              message.append(saved);
-              message.append("\n");
-              message.append("Frames dropped: ");
-              message.append(dropped);
+              message.append("Save ");
+              message.append(framesSave);
+              message.append(" frames - ( ");
+              message.append(framesSavePer);
+              message.append("% )\n");
+              message.append("Drop ");
+              message.append(framesDrop);
+              message.append(" frames - ( ");
+              message.append(framesDropPer);
+              message.append("% )");
               JOptionPane.showMessageDialog(frame, message.toString());
             });
           } catch (Exception ex) {
