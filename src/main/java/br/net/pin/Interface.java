@@ -175,11 +175,12 @@ public class Interface {
     modelResolution.addElement("640x480");
     modelResolution.addElement("800x600");
     modelResolution.addElement("960x720");
+    modelResolution.addElement("1066x600");
     modelResolution.addElement("1280x720");
     modelResolution.addElement("1600x900");
     modelResolution.addElement("1920x1080");
     var resolution = setup.getProperty("resolution");
-    comboResolution.setSelectedItem(resolution != null ? resolution : modelResolution.getElementAt(0));
+    comboResolution.setSelectedItem(resolution != null ? resolution : "1066x600");
   }
 
   private void loadSensitivity(Properties setup) {
@@ -189,7 +190,7 @@ public class Interface {
 
   private void loadResilience(Properties setup) {
     var resilience = setup.getProperty("resilience");
-    modelResilience.setValue(resilience != null ? Integer.parseInt(resilience) : 10);
+    modelResilience.setValue(resilience != null ? Integer.parseInt(resilience) : 18);
   }
 
   private void loadDestiny(Properties setup) {
