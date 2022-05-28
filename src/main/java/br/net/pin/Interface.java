@@ -30,7 +30,7 @@ import javax.swing.SwingUtilities;
 
 public class Interface {
 
-  private final ImageIcon iconLogo = new ImageIcon(getClass().getResource("skmotion.png"));
+  private final ImageIcon iconLogo = new ImageIcon(getClass().getResource("logo.png"));
   private final ImageIcon iconBlue = new ImageIcon(getClass().getResource("blue.png"));
   private final ImageIcon iconGreen = new ImageIcon(getClass().getResource("green.png"));
   private final ImageIcon iconRed = new ImageIcon(getClass().getResource("red.png"));
@@ -374,5 +374,4 @@ public class Interface {
     sb.append(seconds).append("s");
     return sb.toString();
   }
-
 }

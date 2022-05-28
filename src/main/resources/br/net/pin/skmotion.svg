@@ -9,15 +9,29 @@
    viewBox="0 0 256 256"
    sodipodi:docname="skmotion.svg"
    inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
-   inkscape:export-filename="skmotion.png"
-   inkscape:export-xdpi="96"
-   inkscape:export-ydpi="96"
+   inkscape:export-filename="logo.png"
+   inkscape:export-xdpi="12"
+   inkscape:export-ydpi="12"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs
-     id="defs6" />
+     id="defs6">
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter857"
+       x="-0.11483211"
+       y="-0.16174572"
+       width="1.2296642"
+       height="1.3234914">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="7.7674276"
+         id="feGaussianBlur859" />
+    </filter>
+  </defs>
   <sodipodi:namedview
      id="namedview4"
      pagecolor="#ffffff"
@@ -53,11 +67,29 @@
        cx="128"
        cy="128"
        r="105.41183" />
-    <circle
-       style="fill:#d40000;stroke:#000000;stroke-width:7.54987;stroke-miterlimit:4;stroke-dasharray:none"
-       id="path969"
-       cx="128"
-       cy="128"
-       r="48.951252" />
+    <path
+       id="circle848"
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:8.88781;stroke-miterlimit:4;stroke-dasharray:none;filter:url(#filter857)"
+       d="M 104.45508,70.373047 A 57.626106,57.626106 0 0 0 46.830078,128 57.626106,57.626106 0 0 0 104.45508,185.62695 57.626106,57.626106 0 0 0 128,180.56445 a 57.626106,57.626106 0 0 0 23.54492,5.0625 57.626106,57.626106 0 0 0 57.625,-57.62695 57.626106,57.626106 0 0 0 -57.625,-57.626953 57.626106,57.626106 0 0 0 -23.5293,5.054687 57.626106,57.626106 0 0 0 -23.56054,-5.054687 z"
+       transform="matrix(1.0507033,0,0,1.0507033,-6.4900259,-6.490026)" />
+    <g
+       id="g1231">
+      <circle
+         style="fill:#d40000;stroke:#000000;stroke-width:8.43127;stroke-miterlimit:4;stroke-dasharray:none"
+         id="path969"
+         cx="150.33488"
+         cy="128"
+         r="54.666042" />
+      <circle
+         style="fill:#00d400;fill-opacity:1;stroke:#000000;stroke-width:8.43127;stroke-miterlimit:4;stroke-dasharray:none"
+         id="circle824"
+         cx="105.66512"
+         cy="128"
+         r="54.666042" />
+      <path
+         id="circle1061"
+         style="fill:#d4d400;fill-opacity:1;stroke:#000000;stroke-width:8.43127;stroke-miterlimit:4;stroke-dasharray:none"
+         d="M 128.01367,78.128906 A 54.666042,54.666042 0 0 0 95.667969,128 54.666042,54.666042 0 0 0 128,177.86719 54.666042,54.666042 0 0 0 160.33203,128 54.666042,54.666042 0 0 0 128.01367,78.128906 Z" />
+    </g>
   </g>
 </svg>
