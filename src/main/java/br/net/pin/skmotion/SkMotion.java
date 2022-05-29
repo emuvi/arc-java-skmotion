@@ -1,4 +1,4 @@
-package br.net.pin;
+package br.net.pin.skmotion;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;

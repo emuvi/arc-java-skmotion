@@ -1,4 +1,4 @@
-package br.net.pin;
+package br.net.pin.skmotion;
 
 import java.awt.Dimension;
 import java.awt.Image;

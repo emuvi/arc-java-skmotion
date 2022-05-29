@@ -23,7 +23,7 @@
   </licenses>
 
   <properties>
-    <exec.mainClass>br.net.pin.${project.artifactId}</exec.mainClass>
+    <exec.mainClass>br.net.pin.${project.artifactId}.${project.name}</exec.mainClass>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -82,7 +82,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>br.net.pin.${project.name}</mainClass>
+              <mainClass>br.net.pin.${project.artifactId}.${project.name}</mainClass>
               <classpathPrefix>lib/</classpathPrefix>
               <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
             </manifest>
@@ -163,7 +163,7 @@
         <artifactId>exec-maven-plugin</artifactId>
         <version>1.2.1</version>
         <configuration>
-          <mainClass>br.net.pin.${project.name}</mainClass>
+          <mainClass>br.net.pin.${project.artifactId}.${project.name}</mainClass>
         </configuration>
       </plugin>
     </plugins>
