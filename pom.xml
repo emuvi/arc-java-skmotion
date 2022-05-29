@@ -9,6 +9,13 @@
   <url>https://github.com/emuvi/skmotion</url>
   <description>SkMotion (Screen Motion) is an application for desktop that records the frames of a screen only when there is motion on it.</description>
 
+  <licenses>
+    <license>
+      <name>LGPL 3.0 license</name>
+      <url>http://www.opensource.org/licenses/lgpl-3.0.html</url>
+    </license>
+  </licenses>
+
   <properties>
     <exec.mainClass>br.net.pin.${project.artifactId}</exec.mainClass>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
