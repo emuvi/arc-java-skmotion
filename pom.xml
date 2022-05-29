@@ -5,14 +5,20 @@
   <artifactId>skmotion</artifactId>
   <version>0.1.1</version>
   <packaging>jar</packaging>
+
   <name>SkMotion</name>
-  <url>https://github.com/emuvi/skmotion</url>
   <description>SkMotion (Screen Motion) is an application for desktop that records the frames of a screen only when there is motion on it.</description>
+  <url>https://github.com/emuvi/skmotion</url>
+
+  <scm>
+    <url>https://github.com/emuvi/skmotion</url>
+  </scm>
 
   <licenses>
     <license>
       <name>LGPL 3.0 license</name>
       <url>http://www.opensource.org/licenses/lgpl-3.0.html</url>
+      <distribution>repo</distribution>
     </license>
   </licenses>
 
