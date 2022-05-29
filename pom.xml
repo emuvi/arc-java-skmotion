@@ -8,7 +8,7 @@
 
   <name>SkMotion</name>
   <description>SkMotion (Screen Motion) is an application for desktop that records the frames of a screen only when there is motion on it.</description>
-  <url>https://github.com/emuvi/skmotion</url>
+  <url>http://pin.net.br/skmotion</url>
 
   <scm>
     <url>https://github.com/emuvi/skmotion</url>
@@ -140,6 +140,20 @@
             <id>attach-javadocs</id>
             <goals>
               <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.5</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
             </goals>
           </execution>
         </executions>
