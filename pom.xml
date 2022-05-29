@@ -7,6 +7,7 @@
   <packaging>jar</packaging>
   <name>SkMotion</name>
   <url>https://github.com/emuvi/skmotion</url>
+  <description>SkMotion (Screen Motion) is an application for desktop that records the frames of a screen only when there is motion on it.</description>
 
   <properties>
     <exec.mainClass>br.net.pin.${project.artifactId}</exec.mainClass>
