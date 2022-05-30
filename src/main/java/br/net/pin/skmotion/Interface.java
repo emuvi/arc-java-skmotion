@@ -413,9 +413,11 @@ public class Interface {
     var minutes = seconds / 60;
     var hours = minutes / 60;
     if (hours > 0) {
+      minutes = minutes % 60;
       sb.append(hours).append("h ");
     }
     if (minutes > 0) {
+      seconds = seconds % 60;
       sb.append(minutes).append("m ");
     }
     sb.append(seconds).append("s");
