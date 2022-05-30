@@ -2,6 +2,8 @@ package br.net.pin.skmotion;
 
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
@@ -15,28 +17,30 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.imageio.ImageIO;
+
 import org.jcodec.api.awt.AWTSequenceEncoder;
 import org.jcodec.common.io.NIOUtils;
 import org.jcodec.common.io.SeekableByteChannel;
 import org.jcodec.common.model.Rational;
 
 public class RecMotion {
+  private final long captureWait = 100;
+  private final long antiEagerWait = 10;
 
-  private static final long captureWait = 100;
-  private static final long antiEagerWait = 10;
-
-  private static final SimpleDateFormat formatForNames = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+  private final SimpleDateFormat formatForNames = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
   private final Rectangle area;
   private final Dimension size;
   private final File destiny;
   private final Float sensitivity;
   private final Integer resilience;
+  private final Image cursorImage;
   private final List<Thread> working = new ArrayList<>();
   private final ThreadGroup grouped = new ThreadGroup("RecMotion");
   private final AtomicBoolean isCapturing = new AtomicBoolean(true);
-  private final Deque<BufferedImage> toCheck = new ConcurrentLinkedDeque<>();
-  private final Deque<BufferedImage> toSave = new ConcurrentLinkedDeque<>();
+  private final Deque<ScreenAndCursor> toCheck = new ConcurrentLinkedDeque<>();
+  private final Deque<ScreenAndCursor> toSave = new ConcurrentLinkedDeque<>();
   private final AtomicInteger framesSaved = new AtomicInteger(0);
   private final AtomicInteger framesDropped = new AtomicInteger(0);
   private volatile float lastSavedDiffers = 0.0f;
@@ -45,12 +49,19 @@ public class RecMotion {
   private volatile long startTime = System.currentTimeMillis();
   private volatile long stopTime = 0;
 
-  public RecMotion(Rectangle area, Dimension size, File destiny, Float sensitivity, Integer resilience) {
+  public RecMotion(Rectangle area, Dimension size, File destiny, Float sensitivity, Integer resilience)
+      throws Exception {
     this.area = area;
     this.size = size;
     this.destiny = destiny;
     this.sensitivity = sensitivity;
     this.resilience = resilience;
+    var cursorDiff = Math.max(size.height - 480, 0);
+    var cursorProp = 0.027f;
+    var cursorWith = 16 + (int) (cursorDiff * cursorProp);
+    var cursorSize = Math.min(cursorWith, 32);
+    this.cursorImage = ImageIO.read(getClass().getResource("cursor.png")).getScaledInstance(cursorSize, cursorSize,
+        Image.SCALE_SMOOTH);
   }
 
   private synchronized boolean isTimeToCapture() {
@@ -71,7 +82,8 @@ public class RecMotion {
           while (isCapturing.get()) {
             if (isTimeToCapture()) {
               var screen = robot.createScreenCapture(area);
-              toCheck.addLast(screen);
+              var cursor = MouseInfo.getPointerInfo().getLocation();
+              toCheck.addLast(new ScreenAndCursor(screen, cursor));
             } else {
               Thread.sleep(antiEagerWait);
             }
@@ -92,14 +104,16 @@ public class RecMotion {
           BufferedImage last = null;
           var resilienceGuard = resilience;
           while (true) {
-            var screen = toCheck.pollFirst();
-            if (screen != null) {
+            var screenAndCursor = toCheck.pollFirst();
+            if (screenAndCursor != null) {
+              var screen = screenAndCursor.getScreen();
+              var cursor = screenAndCursor.getCursor();
               if (last == null || hasMotion(last, screen)) {
-                send(screen);
+                send(screen, cursor);
                 last = screen;
                 resilienceGuard = resilience;
               } else if (resilienceGuard > 0) {
-                send(screen);
+                send(screen, cursor);
                 resilienceGuard--;
               } else {
                 framesDropped.incrementAndGet();
@@ -115,11 +129,11 @@ public class RecMotion {
         }
       }
 
-      private void send(BufferedImage screen) {
+      private void send(BufferedImage screen, Point cursor) {
         var scaled = screen.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH);
         var result = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
         result.createGraphics().drawImage(scaled, 0, 0, null);
-        toSave.addLast(result);
+        toSave.addLast(new ScreenAndCursor(result, cursor));
       }
     };
     working.add(thread);
@@ -128,14 +142,23 @@ public class RecMotion {
 
   private void spawnSaveThread() {
     var thread = new Thread(grouped, "Saving") {
+      private final float timesWidth = (float) size.width / area.width;
+      private final float timesHeight = (float) size.height / area.height;
+
       public void run() {
         SeekableByteChannel out = null;
         try {
           out = NIOUtils.writableFileChannel(getPath());
           var encoder = new AWTSequenceEncoder(out, Rational.R(10, 1));
           while (true) {
-            var screen = toSave.pollFirst();
-            if (screen != null) {
+            var screenAndCursor = toSave.pollFirst();
+            if (screenAndCursor != null) {
+              var screen = screenAndCursor.getScreen();
+              var cursor = screenAndCursor.getCursor();
+              var cursorPosition = getCursorPosition(cursor);
+              if (cursorPosition != null) {
+                screen.getGraphics().drawImage(cursorImage, cursorPosition.x, cursorPosition.y, null);
+              }
               encoder.encodeImage(screen);
               framesSaved.incrementAndGet();
             } else if (!isCapturing.get()) {
@@ -157,6 +180,15 @@ public class RecMotion {
         var now = System.currentTimeMillis();
         var fileDestiny = new File(destiny, formatForNames.format(now) + ".mp4");
         return fileDestiny.getAbsolutePath();
+      }
+
+      public Point getCursorPosition(Point cursor) {
+        if (!area.contains(cursor)) {
+          return null;
+        }
+        cursor.x = (int) (cursor.x * timesWidth);
+        cursor.y = (int) (cursor.y * timesHeight);
+        return cursor;
       }
     };
     working.add(thread);
@@ -227,5 +259,23 @@ public class RecMotion {
       lastDroppedDiffers = differs;
     }
     return result;
+  }
+
+  private static class ScreenAndCursor {
+    private final BufferedImage screen;
+    private final Point cursor;
+
+    public ScreenAndCursor(BufferedImage screen, Point cursor) {
+      this.screen = screen;
+      this.cursor = cursor;
+    }
+
+    public BufferedImage getScreen() {
+      return screen;
+    }
+
+    public Point getCursor() {
+      return cursor;
+    }
   }
 }
