@@ -57,9 +57,9 @@ public class RecMotion {
     this.sensitivity = sensitivity;
     this.resilience = resilience;
     var cursorDiff = Math.max(size.height - 480, 0);
-    var cursorProp = 0.027f;
+    var cursorProp = 0.012f;
     var cursorWith = 16 + (int) (cursorDiff * cursorProp);
-    var cursorSize = Math.min(cursorWith, 32);
+    var cursorSize = Math.min(cursorWith, 24);
     this.cursorImage = ImageIO.read(getClass().getResource("cursor.png")).getScaledInstance(cursorSize, cursorSize,
         Image.SCALE_SMOOTH);
   }
