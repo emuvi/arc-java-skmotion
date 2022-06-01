@@ -84,6 +84,9 @@ public class Interface {
         JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
       }
     });
+    comboScreen.addActionListener((ev) -> {
+      jumpOnPositionByScreen();
+    });
     labelResolution.setHorizontalAlignment(SwingConstants.RIGHT);
     labelSensitivity.setHorizontalAlignment(SwingConstants.RIGHT);
     labelResilience.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -173,7 +176,6 @@ public class Interface {
     if (file.exists()) {
       setup.load(new FileInputStream(file));
     }
-    loadPosition(setup);
     loadScreens(setup);
     loadResolutions(setup);
     loadSensitivity(setup);
@@ -181,21 +183,22 @@ public class Interface {
     loadDestiny(setup);
   }
 
-  private void loadPosition(Properties setup) {
-    var posX = setup.getProperty("posX");
-    var posY = setup.getProperty("posY");
-    if (posX != null && posY != null) {
-      frame.setLocation(Integer.parseInt(posX), Integer.parseInt(posY));
-    }
-  }
-
   private void loadScreens(Properties setup) {
-    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    var ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     for (var display : ge.getScreenDevices()) {
       modelScreen.addElement(display.getIDstring());
     }
     var screen = setup.getProperty("screen");
     comboScreen.setSelectedItem(screen != null ? screen : modelScreen.getElementAt(0));
+    jumpOnPositionByScreen();
+  }
+
+  private void jumpOnPositionByScreen() {
+    var jumpTo = comboScreen.getSelectedIndex();
+    var ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    var device = ge.getScreenDevices()[jumpTo];
+    var bounds = device.getDefaultConfiguration().getBounds();
+    frame.setLocation(bounds.x + 54, bounds.y + 54);
   }
 
   private void loadResolutions(Properties setup) {
@@ -229,8 +232,6 @@ public class Interface {
   private void save() throws Exception {
     var file = new FileOutputStream(new File(appFolder, "skmotion.ini"));
     var setup = new Properties();
-    setup.setProperty("posX", String.valueOf(frame.getLocation().x));
-    setup.setProperty("posY", String.valueOf(frame.getLocation().y));
     setup.setProperty("screen", String.valueOf(comboScreen.getSelectedItem()));
     setup.setProperty("resolution", String.valueOf(comboResolution.getSelectedItem()));
     setup.setProperty("sensitivity", String.valueOf(modelSensitivity.getValue()));
