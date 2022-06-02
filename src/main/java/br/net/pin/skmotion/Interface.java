@@ -64,6 +64,7 @@ public class Interface {
   private final JButton buttonAbout = new JButton("About");
   private final JButton buttonAction = new JButton("Start");
 
+  private volatile JFrame indicator = null;
   private volatile RecMotion recMotion = null;
 
   public Interface() {
@@ -236,7 +237,19 @@ public class Interface {
     setup.store(file, "SkMotion");
   }
 
+  private void closeIndicator() {
+    if (indicator != null) {
+      indicator.setVisible(false);
+      indicator.dispose();
+      indicator = null;
+    }
+  }
+
   private void showScreenIndicator() throws Exception {
+    if (indicator != null) {
+      closeIndicator();
+      return;
+    }
     var screen = String.valueOf(comboScreen.getSelectedItem());
     var graphics = GraphicsEnvironment.getLocalGraphicsEnvironment();
     Rectangle area = null;
@@ -249,7 +262,7 @@ public class Interface {
     if (area == null) {
       throw new Exception("Screen not found");
     }
-    var indicator = new JFrame("Screen Indicator");
+    indicator = new JFrame("Screen Indicator");
     indicator.setIconImage(iconLogo.getImage());
     indicator.setUndecorated(true);
     indicator.setAlwaysOnTop(true);
@@ -261,15 +274,13 @@ public class Interface {
     indicator.addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
-        indicator.setVisible(false);
-        indicator.dispose();
+        closeIndicator();
       }
     });
     indicator.addKeyListener(new KeyAdapter() {
       @Override
       public void keyPressed(KeyEvent e) {
-        indicator.setVisible(false);
-        indicator.dispose();
+        closeIndicator();
       }
     });
     indicator.setVisible(true);
