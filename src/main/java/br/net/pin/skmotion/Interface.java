@@ -59,7 +59,7 @@ public class Interface {
   private final JLabel labelResilience = new JLabel("Resilience:");
   private final JTextField textResilience = new JTextField(12);
   private final JButton buttonDestiny = new JButton("Destiny");
-  private final JTextField textDestiny = new JTextField(60);
+  private final JTextField textDestiny = new JTextField(64);
   private final JLabel labelStatus = new JLabel("Waiting to start...");
   private final JButton buttonAbout = new JButton("About");
   private final JButton buttonAction = new JButton("Start");
@@ -318,14 +318,14 @@ public class Interface {
               var saved = recMotion.getSavedFrames();
               if (saved != lastSaved) {
                 lastSaved = saved;
-                var differs = String.format("%.6f", recMotion.getSavedDiffers());
+                var differs = String.format("%.9f", recMotion.getSavedDiffers());
                 SwingUtilities.invokeLater(() -> {
                   labelStatus.setIcon(iconGreen);
                   labelStatus.setText("Motion save: " + differs);
                 });
               } else if (dropped != lastDropped) {
                 lastDropped = dropped;
-                var differs = String.format("%.6f", recMotion.getDroppedDiffers());
+                var differs = String.format("%.9f", recMotion.getDroppedDiffers());
                 SwingUtilities.invokeLater(() -> {
                   labelStatus.setIcon(iconRed);
                   labelStatus.setText("Motion drop: " + differs);
