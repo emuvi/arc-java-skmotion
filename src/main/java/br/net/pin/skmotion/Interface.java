@@ -197,7 +197,9 @@ public class Interface {
     var ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
     var device = ge.getScreenDevices()[jumpTo];
     var bounds = device.getDefaultConfiguration().getBounds();
-    frame.setLocation(bounds.x + 54, bounds.y + 54);
+    var posX = bounds.x + (bounds.width / 2 - frame.getWidth() / 2);
+    var posY = bounds.y + (bounds.height / 2 - frame.getHeight() / 2);
+    frame.setLocation(posX, posY);
   }
 
   private void loadResolutions(Properties setup) {
