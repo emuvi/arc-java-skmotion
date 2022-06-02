@@ -215,11 +215,13 @@ public class Interface {
   }
 
   private void loadSensitivity(Properties setup) {
-    textSensitivity.setText(setup.getProperty("sensitivity"));
+    var sensitivity = setup.getProperty("sensitivity");
+    textSensitivity.setText(sensitivity != null ? sensitivity : "0.0001");
   }
 
   private void loadResilience(Properties setup) {
-    textResilience.setText(setup.getProperty("resilience"));
+    var resilience = setup.getProperty("resilience");
+    textResilience.setText(resilience != null ? resilience : "18");
   }
 
   private void loadDestiny(Properties setup) {
